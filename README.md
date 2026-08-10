@@ -1,140 +1,162 @@
 # Mobirex
 
-**CRM/ERP for phone and accessory retail shops in Uzbekistan.**
-Django + DRF backend, Flutter mobile app, live in production.
+**Telefon va aksessuar do'konlari uchun CRM/ERP tizimi**
 
 ![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)
 ![DRF](https://img.shields.io/badge/DRF-REST_API-A30000)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)
 ![Celery](https://img.shields.io/badge/Celery-Redis-37814A?logo=celery&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-Riverpod-02569B?logo=flutter&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-
-🌐 [mobirex.uz](https://mobirex.uz) · 🔌 `api.mobirex.uz` · 📱 [Google Play](https://play.google.com/store/apps/details?id=uz.mobirex.app)
-
-> **This repository is a selected part of the codebase, not the whole project.**
-> The President Tech Award application asks for *a part* of the project's code.
-> See [What is in this repository](#what-is-in-this-repository) for what was
-> included and why.
 
 ---
 
-## The problem
+## Bu repozitoriy nima
 
-Phone shops in Uzbekistan run on paper notebooks, Excel files and Telegram
-messages. Stock, sales, staff salaries and customer debt all live in different
-places, and none of them reconcile. The owner of a two-branch shop cannot
-answer basic questions: who sold what today, how much cash is in each branch,
-who still owes money, what the actual profit was last month.
+Bu — **Mobirex loyihasining butun kodi emas, tanlangan bir qismi**. Asosiy kod
+bazasi yopiq repozitoriyda turadi; bu yerga arxitektura va muhandislik yechimini
+ko'rsatadigan fayllar ajratib olingan.
 
-The specific problem is not "no software" — it is that the shop's money moves
-through several independent channels at once. Phones and accessories are bought
-from different suppliers with different capital, sold by different staff, and
-customers take goods on credit in both directions ("we gave" / "we took").
-Generic retail software collapses this into one inventory number and the numbers
-stop matching reality within a week.
+Repozitoriy **Prezident Tech Award** arizasi uchun tayyorlandi — ariza shakli
+loyiha kodining bir qismini so'raydi.
 
-## The solution
+Tanlashda hajm emas, **qaror ko'rinadigan kod** mezoni ishlatildi: pul
+arifmetikasi, parallel so'rovlarda to'g'ri ishlash, qatlamlar ajratilishi va
+testlar. Migratsiyalar, sozlamalar, `__init__.py` va generatsiya qilingan
+fayllar ataylab kiritilmadi.
 
-Mobirex models the shop the way the shop actually works:
-
-- **Two independent capital pools** per branch — phone capital and accessory
-  capital never mix. Every operation debits or credits exactly one of them.
-- **Role-scoped access** — an owner sees all their branches; a phone seller sees
-  only phones in their branch; an accessory seller sees only accessories.
-- **Bidirectional debt** — a debt has a direction and a domain, so "the customer
-  owes us for a phone" and "we owe the supplier for accessories" are tracked
-  separately and hit the correct capital pool.
-- **Month closing** — at month end unsold stock rolls into the next month as new
-  purchases and the closing month's dashboard is frozen into a snapshot, so a
-  later edit cannot rewrite a report the owner already read.
-- **Subscription billing** — a daily fee is charged per account, with a 3-day
-  grace period before the account is blocked.
-
-## Screenshots
-
-| Login | Dashboard |
-|---|---|
-| <img src="screenshots/01-login.png" width="260"> | <img src="screenshots/02-dashboard.png" width="260"> |
-
-| Reports | Phone stock |
-|---|---|
-| <img src="screenshots/03-reports.png" width="260"> | <img src="screenshots/04-phones.png" width="260"> |
+> Jami **35 ta fayl**: 26 ta Python (backend), 9 ta Dart (mobil ilova).
 
 ---
 
-## Architecture
+## Muammo
+
+O'zbekistondagi telefon do'konlari hisobni qog'oz daftar, Excel jadvali va
+Telegram xabarlarida yuritadi. Tovar, sotuv, xodim maoshi va mijoz qarzi — har
+biri alohida joyda, va ular bir-biriga to'g'ri kelmaydi. Ikki filialli do'kon
+egasi eng oddiy savollarga javob bera olmaydi: bugun kim nima sotdi, qaysi
+filialda qancha naqd pul bor, kim qarzdor, o'tgan oyning haqiqiy foydasi qancha
+bo'ldi.
+
+Asosiy qiyinchilik "dastur yo'q" emas. Do'konning puli bir vaqtning o'zida bir
+nechta mustaqil kanal orqali harakatlanadi: telefon va aksessuar boshqa
+ta'minotchidan, boshqa kapital hisobidan olinadi, boshqa xodim tomonidan
+sotiladi, qarz esa ikki tomonga ham yuriydi. Umumiy do'kon dasturlari buni
+bitta "ombor qoldig'i" raqamiga siqib qo'yadi — va bir hafta ichida raqamlar
+haqiqatga to'g'ri kelmay qoladi.
+
+## Yechim
+
+Mobirex do'konni aynan ishlaydigan tartibida modellashtiradi:
+
+- **Ikki mustaqil kapital hovuzi** — har filialda telefon kapitali va aksessuar
+  kapitali aralashmaydi. Har bir amaliyot aniq bittasidan yechadi yoki
+  bittasiga qo'shadi.
+- **Rol bo'yicha kirish** — egasi o'z filiallarining hammasini ko'radi; telefon
+  sotuvchi faqat o'z filialidagi telefonlarni; aksessuar sotuvchi faqat
+  aksessuarlarni.
+- **Ikki tomonlama qarz** — qarzning yo'nalishi ("berdik" / "oldik") va
+  yo'nalishi bo'yicha domeni bor, shuning uchun "mijoz telefon uchun qarzdor"
+  bilan "biz ta'minotchiga aksessuar uchun qarzdormiz" alohida yuritiladi va
+  kerakli kapital hovuziga tegadi.
+- **Oy yopilishi** — oy oxirida sotilmagan tovar keyingi oyga yangi xarid
+  sifatida o'tkaziladi, yopilgan oy hisoboti esa snapshot qilib muzlatiladi.
+  Keyinchalik eski yozuv tahrirlansa ham, egasi allaqachon o'qigan hisobot
+  o'zgarmaydi.
+- **Obuna to'lovi** — har kuni hisobdan kunlik to'lov yechiladi, balans
+  minusga tushsa 3 kunlik imtiyoz muddati beriladi, undan keyin hisob bloklanadi.
+
+## Skrinshotlar
+
+| Kirish | Modullar menyusi |
+|---|---|
+| <img src="screenshots/01-login.png" width="250"> | <img src="screenshots/02-menu.png" width="250"> |
+
+| Sotilmagan telefonlar | Xodimlar va rollar |
+|---|---|
+| <img src="screenshots/04-phones.png" width="250"> | <img src="screenshots/03-staff.png" width="250"> |
+
+---
+
+## Arxitektura
 
 ```
-                Flutter app (Riverpod · GoRouter · Dio)
+              Flutter ilova (Riverpod · GoRouter · Dio)
                               │
-                     HTTPS · JWT bearer
-                              │
-        ┌─────────────────────▼─────────────────────┐
-        │  nginx  (TLS termination, static, media)  │
-        └─────────────────────┬─────────────────────┘
+                     HTTPS · JWT bearer token
                               │
         ┌─────────────────────▼─────────────────────┐
-        │  API layer      views · serializers       │  ← HTTP only:
-        │                 permissions · throttles   │    parse, authorise,
-        └─────────────────────┬─────────────────────┘    shape the response
+        │  API qatlami    view · serializer         │  ← faqat HTTP:
+        │                 permission · throttle     │    o'qish, ruxsat,
+        └─────────────────────┬─────────────────────┘    javob shakli
                               │
         ┌─────────────────────▼─────────────────────┐
-        │  Service layer  every state mutation      │  ← all business rules,
-        │                 transactions · locking    │    all money arithmetic
-        └─────────────────────┬─────────────────────┘
+        │  Service qatlami   har qanday o'zgarish   │  ← barcha biznes
+        │                    tranzaksiya · lock     │    qoidalari va
+        └─────────────────────┬─────────────────────┘    pul arifmetikasi
                               │
         ┌─────────────────────▼─────────────────────┐
-        │  Models         PostgreSQL · soft delete  │
+        │  Modellar       PostgreSQL · soft delete  │
         └───────────────────────────────────────────┘
                               │
-              Celery + Redis — nightly billing,
-              monthly closing, error notifications
+              Celery + Redis — kunlik to'lov,
+              oylik yopilish, xato bildirishnomalari
 ```
 
-**Why a service layer.** Views never write to the database. Every mutation goes
-through a service that owns the transaction boundary, the capital arithmetic and
-the audit-journal entry. The same service is called from the REST API, the Django
-admin, a management command and a Celery task — which is exactly why the
-transaction has to live in the service and not in the view.
+**Nega service qatlami kerak.** View hech qachon bazaga yozmaydi. Har qanday
+o'zgarish service orqali o'tadi, va tranzaksiya chegarasi, kapital arifmetikasi
+hamda audit jurnaliga yozuv — hammasi o'sha service ichida. Bitta service REST
+API'dan ham, Django admin panelidan ham, management komandadan ham, Celery
+taskdan ham chaqiriladi. Aynan shuning uchun tranzaksiya view'da emas, service
+ichida turishi shart.
 
-**Multi-tenancy.** Isolation is three-dimensional: branch → role → domain. A user
-holds roles per branch (`OWNER`, `PHONE_SELLER`, `ACCESSORY_SELLER`, cashier), and
-the queryset for every endpoint is narrowed by all three. A phone seller and an
-accessory seller can work in the same branch and see disjoint data.
+**Ko'p ijarachilik (multi-tenancy).** Izolyatsiya uch o'lchovli:
+**filial → rol → domen**. Foydalanuvchi rollarni filial bo'yicha oladi
+(`OWNER`, `PHONE_SELLER`, `ACCESSORY_SELLER`, kassir), va har bir endpoint
+queryset'i uchala o'lcham bo'yicha toraytiriladi. Telefon sotuvchi va aksessuar
+sotuvchi bitta filialda ishlab, bir-birining ma'lumotini umuman ko'rmaydi.
+
+**Nega oy yopilishi idempotent bo'lishi shart.** Bu amal ham qo'lda (management
+komanda), ham avtomatik (Celery beat) ishga tushadi. Agar u ikki marta ishlab
+ketsa, o'sha tovar ikkinchi marta keyingi oyga ko'chiriladi va kapitaldan pul
+ikki barobar yechiladi — ya'ni do'konning hisobi buziladi. Shu sababli amal
+qayta ishga tushirilganda ham natija bir xil bo'lishi kafolatlanishi kerak.
 
 ---
 
-## Technical highlights
+## Texnik jihatlar
 
-### 1. Idempotent month-close
+### 1. Idempotent oy yopilishi
 
-At month end, unsold stock is carried into the next month as a new purchase and
-the closing month's dashboard is frozen into a snapshot. The operation runs from
-both a management command and a Celery beat task, so it **must** be safe to run
-twice — a duplicate run would otherwise roll the same inventory over again and
-double-charge the capital pool.
+Oy oxirida sotilmagan tovar keyingi oyga yangi xarid sifatida o'tkaziladi va
+yopilgan oy dashboardi snapshot ichiga muzlatiladi.
 
-A `MonthClosingRecord` with a `UniqueConstraint(branch, month)` is the idempotency
-key. The record is claimed in its own transaction *before* the work starts; a
-concurrent second run hits the `IntegrityError`, re-reads the record and returns
-`skipped`. Inside the main transaction the branch row is locked with
-`select_for_update()`, and rollover reads take row locks too. A crash marks the
-record `failed`, and a record left `started` for more than 6 hours is treated as
-stale and retried — otherwise one crashed run would block that branch forever.
-`dry_run` executes the whole path and then calls `transaction.set_rollback(True)`,
-so the preview is computed by the exact same code as the real run.
+**Qiyin joyi:** amal ikki manbadan ishga tushadi, demak ikki marta bajarilishi
+mumkin, va takroriy bajarilish kapitaldan pulni ikki barobar yechib yuboradi.
 
-→ [`backend/services/month_closing/service.py`](backend/services/month_closing/service.py)
-· tested under real thread contention in
+Yechim — `MonthClosingRecord` modeli, `UniqueConstraint(branch, month)` bilan.
+Yozuv **ish boshlanishidan oldin**, alohida tranzaksiyada band qilinadi; parallel
+ishga tushgan ikkinchi jarayon `IntegrityError` ga uriladi, yozuvni qayta o'qiydi
+va `skipped` qaytaradi. Asosiy tranzaksiya ichida filial qatori
+`select_for_update()` bilan qulflanadi, ko'chiriladigan telefon qatorlari ham
+lock ostida o'qiladi. Jarayon qulasa, yozuv `failed` deb belgilanadi; 6 soatdan
+ortiq `started` holatida qolgan yozuv "eskirgan" deb qaraladi va qayta
+urinishga ruxsat beriladi — aks holda bitta qulagan urinish o'sha filialni
+abadiy bloklab qo'yardi. `dry_run` rejimi butun yo'lni haqiqiy kod bilan
+hisoblab, oxirida `transaction.set_rollback(True)` chaqiradi — shuning uchun
+oldindan ko'rish natijasi haqiqiy natija bilan bir xil bo'ladi.
+
+📄 [`backend/services/month_closing/service.py`](backend/services/month_closing/service.py)
+· haqiqiy parallel oqimlar bilan sinaladi:
 [`backend/tests/test_month_closing_race.py`](backend/tests/test_month_closing_race.py)
 
-### 2. Separate capital pools, mutated under lock
+### 2. Alohida kapital hovuzlari, lock ostida o'zgartiriladi
 
-Phones and accessories are financially independent verticals. Which pool an
-operation touches is derived from the actor's role, not from a client-supplied
-field — a phone seller cannot address accessory capital even by crafting the
-request:
+Telefon va aksessuar — moliyaviy jihatdan mustaqil ikki yo'nalish.
+
+**Qiyin joyi:** amaliyot qaysi hovuzga tegishini mijoz yuborgan maydonga
+ishonib aniqlash mumkin emas — bo'lmasa telefon sotuvchi so'rovni o'zgartirib
+aksessuar kapitaliga tegib ketishi mumkin. Shuning uchun hovuz **foydalanuvchi
+rolidan** kelib chiqib aniqlanadi:
 
 ```python
 # backend/services/capital/capital_service.py
@@ -145,162 +167,193 @@ def get_capital_for_user(user, branch, month_start, capital_type=None):
             raise ValidationError(_("Ruxsat yo'q."))
         return CapitalService.get_phone_capital(branch, month_start)
     ...
-    # Owners must state the type explicitly — they can reach both pools.
+    # Egasi ikkala hovuzga ham kira oladi — shuning uchun turini
+    # aniq ko'rsatishi majburiy.
     if not capital_type:
         raise ValidationError(_("Egasi kapital turini ko'rsatishi shart."))
 ```
 
-Every capital row is fetched with `select_for_update()` and every mutation runs
-inside `transaction.atomic()`, so two concurrent sales in the same branch cannot
-lose an update.
+Har bir kapital qatori `select_for_update()` bilan olinadi va har bir
+o'zgartirish `transaction.atomic()` ichida bajariladi — shuning uchun bitta
+filialda bir vaqtda ketgan ikkita sotuv bir-birining yozuvini yo'qotmaydi.
 
-→ [`backend/services/capital/capital_service.py`](backend/services/capital/capital_service.py)
+📄 [`backend/services/capital/capital_service.py`](backend/services/capital/capital_service.py)
 · [`backend/tests/test_capital_isolation.py`](backend/tests/test_capital_isolation.py)
 
-### 3. Frozen historical reports
+### 3. Muzlatilgan tarixiy hisobotlar
 
-A dashboard for a past month is served from `DashboardSnapshot`, not recomputed.
-Once a month is closed, editing an old record cannot silently rewrite a report the
-owner already acted on. The current month is always computed live.
+O'tgan oy dashboardi qayta hisoblanmaydi — `DashboardSnapshot` dan o'qiladi.
 
-### 4. Subscription billing with a grace period
+**Qiyin joyi:** hisobot "jonli" hisoblansa, eski yozuvni tahrirlash allaqachon
+o'qilgan hisobotni jimgina o'zgartirib yuboradi. Oy yopilgandan keyin uning
+raqamlari qotib qoladi; joriy oy esa doim jonli hisoblanadi.
 
-A nightly Celery task charges each account its daily fee. The charge is idempotent
-per `(user, charge_day)` — a re-run finds the existing `TransactionLog` and skips
-rather than double-charging. A negative balance starts a 3-day grace window; after
-that the account is blocked.
+📄 [`backend/models/month_closing.py`](backend/models/month_closing.py)
 
-Enforcement is a single permission appended to *every* `BaseAPIView` endpoint, so
-a new endpoint cannot forget it. The check is read-only (`persist=False`): it
-reflects the state the nightly job maintains, it never mutates the account on a
-request path.
+### 4. Obuna to'lovi va imtiyoz muddati
+
+Har kecha Celery taski har bir hisobdan kunlik to'lovni yechadi.
+
+**Qiyin joyi:** task qayta ishga tushsa, pul ikki marta yechilmasligi kerak.
+Shuning uchun yechim `(user, charge_day)` juftligi bo'yicha idempotent — mavjud
+`TransactionLog` topilsa, amal o'tkazib yuboriladi. Balans minusga tushsa
+3 kunlik imtiyoz muddati boshlanadi, undan keyin hisob bloklanadi.
+
+Bloklashni tekshirish **har bir** `BaseAPIView` endpointiga avtomatik
+qo'shiladi — shuning uchun yangi endpoint yozilganda uni unutib qo'yish
+imkoni yo'q:
 
 ```python
 # backend/api/base.py
 def get_permissions(self):
-    """Append billing-block enforcement to each view's own permissions."""
+    """Har bir view'ning o'z permissionlariga billing tekshiruvini qo'shadi."""
     return [*super().get_permissions(), IsAccountActive()]
 ```
 
-A blocked account returns HTTP **402** with a structured body
-(`error.code == "account_blocked"`) rather than a bare 403, so the mobile client
-can route to the blocked screen instead of logging the user out.
+Bloklangan hisob oddiy 403 emas, **HTTP 402** va tuzilgan javob qaytaradi
+(`error.code == "account_blocked"`) — shunda mobil ilova foydalanuvchini
+tizimdan chiqarib yubormasdan, "to'lov kerak" ekraniga olib o'tadi.
 
-→ [`backend/services/billing/`](backend/services/billing)
+📄 [`backend/services/billing/daily_charge.py`](backend/services/billing/daily_charge.py)
 · [`backend/api/permissions.py`](backend/api/permissions.py)
+· [`backend/api/responses.py`](backend/api/responses.py)
 
-### 5. Deduplicated error reporting to Telegram
+### 5. Xatolarni guruhlab Telegram'ga yuborish
 
-Backend exceptions and mobile crashes land in one `ErrorReport` table, keyed by a
-SHA-256 fingerprint of `(source, error_type, path, status_code, kind)`. A repeat
-increments `occurrence_count` under `select_for_update()` instead of inserting a
-new row. Telegram is notified on the first occurrence, at the 10/100/1000
-milestones and always for `CRITICAL` — with a 5-minute floor between messages, so
-a failing endpoint under load cannot flood the channel.
+Backend xatolari va mobil ilova crashlari bitta `ErrorReport` jadvaliga
+tushadi. Kalit — `(manba, xato turi, path, status_code, kind)` dan olingan
+SHA-256 barmoq izi.
 
-Two failure modes the implementation has to survive: the notifier is a **silent
-no-op** when the token is unconfigured (reports still persist), and the logging
-handler drops any record originating from its own package — otherwise reporting an
-error would log an error would report an error.
+**Qiyin joyi:** ishlamay qolgan endpoint minutiga yuzlab xato bergani uchun
+har birini alohida yuborish kanalni ham, bazani ham ko'mib tashlaydi. Takroriy
+xato yangi qator yaratmaydi — `select_for_update()` ostida `occurrence_count`
+oshiriladi. Telegram'ga faqat birinchi marta, 10 / 100 / 1000 chegaralarida va
+`CRITICAL` bo'lganda xabar ketadi, ikki xabar orasida kamida 5 daqiqa bo'ladi.
 
-→ [`backend/services/error_reporting/`](backend/services/error_reporting)
+Ikkita alohida holat hisobga olingan: token sozlanmagan bo'lsa notifier
+**jimgina o'chib turadi** (xato baza'ga baribir yoziladi), va logging handler
+o'z paketidan kelgan log yozuvini tashlab yuboradi — aks holda xatoni
+bildirish yana xato yozardi, u esa yana xato bildirardi.
 
-### 6. Token refresh without losing the request
+📄 [`backend/services/error_reporting/service.py`](backend/services/error_reporting/service.py)
+· [`backend/services/error_reporting/logging_handler.py`](backend/services/error_reporting/logging_handler.py)
 
-The Flutter client uses a `QueuedInterceptorsWrapper`, so parallel requests hitting
-an expired token queue behind a single refresh instead of firing N refresh calls.
-The refresh itself goes through a separate `Dio` instance to avoid interceptor
-recursion, and the original request is replayed with the new token. The 402
-billing block is handled in its own branch and never touches the 401 path — the
-user is blocked, not logged out.
+### 6. Mobil ilovaning ulanish uzilishiga chidamliligi
 
-→ [`mobile/core/network/interceptors/auth_interceptor.dart`](mobile/core/network/interceptors/auth_interceptor.dart)
+**Token yangilash navbati.** Ilova `QueuedInterceptorsWrapper` ishlatadi:
+token eskirgan paytda bir vaqtda ketgan bir nechta so'rov N ta refresh
+so'rovini yubormaydi, bittasining orqasida navbatga turadi. Refresh o'zi
+alohida `Dio` obyekti orqali ketadi (interceptor rekursiyasi bo'lmasligi
+uchun), keyin dastlabki so'rov yangi token bilan qayta yuboriladi. 402
+(bloklangan hisob) esa mutlaqo alohida shoxda ishlanadi va 401 oqimiga
+tegmaydi — foydalanuvchi bloklanadi, lekin tizimdan chiqarib yuborilmaydi.
+
+**Internetsiz yuborilgan xatolar yo'qolmaydi.** Xato hisoboti yuborilmasa
+diskdagi navbatga yoziladi va ulanish tiklanganda (`connectivity_plus`
+oqimini kuzatib) qaytadan yuboriladi. Mijoz tomonda ham xuddi backend'dagi
+kabi barmoq izi va rate limiter bor — bitta xato takrorlansa, tarmoqqa
+takroran chiqmaydi.
+
+📄 [`mobile/core/network/interceptors/auth_interceptor.dart`](mobile/core/network/interceptors/auth_interceptor.dart)
+· [`mobile/core/error_reporting/error_reporter.dart`](mobile/core/error_reporting/error_reporter.dart)
 
 ---
 
-## What is in this repository
+## Repozitoriyda nima bor
 
-A selection — 39 files out of a much larger codebase — chosen to show
-architecture and judgement rather than volume. Migrations, settings, `__init__.py`
-files, generated code and dependency locks are deliberately excluded, as is
-anything that could carry a credential.
-
-| Path | What it shows |
+| Papka | Nimani ko'rsatadi |
 |---|---|
-| `backend/services/month_closing/` | the hardest logic in the project: idempotency, locking, rollover, snapshots |
-| `backend/services/capital/` | the two-pool capital model and role-derived access |
-| `backend/services/billing/` | daily charge, grace period, access decisions |
-| `backend/services/phone/`, `backend/services/debt/` | per-operation capital arithmetic and the audit journal |
-| `backend/services/error_reporting/` | fingerprinting, deduplication, rate-limited notification |
-| `backend/api/` | response envelope, exception handling, permissions, throttles, one full view module |
-| `backend/models/` | three representative models (constraints, indexes, soft delete) |
-| `backend/tests/` | the month-close suite, including a real thread-contention test |
-| `mobile/core/` | networking, JWT refresh, theme tokens, error reporting |
-| `mobile/features/phones/` | one complete vertical slice: model → repository → provider → page |
-| `infra/` | Docker Compose and nginx, **sanitised** — every credential is a placeholder |
+| `backend/services/month_closing/` | loyihadagi eng murakkab mantiq: idempotentlik, lock, tovar ko'chirish, snapshot |
+| `backend/services/capital/` | ikki kapital hovuzi va roldan kelib chiqadigan kirish |
+| `backend/services/billing/` | kunlik to'lov, imtiyoz muddati, kirish qarori |
+| `backend/services/phone/`, `backend/services/debt/` | har bir amaliyotdagi kapital arifmetikasi va audit jurnali |
+| `backend/services/error_reporting/` | barmoq izi, guruhlash, cheklangan bildirishnoma |
+| `backend/api/` | javob konverti, xatolarni ishlash, permission, throttle, bitta to'liq view moduli |
+| `backend/models/` | uchta namunaviy model (constraint, index, soft delete) |
+| `backend/tests/` | oy yopilishi testlari, jumladan haqiqiy parallel oqim testi |
+| `mobile/core/` | tarmoq qatlami, JWT yangilash, dizayn tokenlari, xato hisoboti |
+| `mobile/features/phones/` | bitta to'liq vertikal qatlam: model → repository → provider → sahifa |
 
-**Not included:** environment files, Android signing keys, database dumps, deploy
-scripts, server configuration containing infrastructure detail, and the demo-data
-generator (it contains a demo password). No real secret appears anywhere in this
-repository.
+**Kiritilmagan:** environment fayllar, Android imzo kalitlari, baza dumplari,
+deploy skriptlari, server konfiguratsiyasi va demo ma'lumot generatori.
+Repozitoriyda birorta ham haqiqiy maxfiy qiymat — token, parol, kalit, server
+IP'si — yo'q.
 
-## Tech stack
+## Texnologiyalar
 
-| Layer | Technology |
+| Qatlam | Texnologiya |
 |---|---|
 | Backend | Django 5.2, Django REST Framework, SimpleJWT, drf-spectacular |
-| Database | PostgreSQL 15 |
-| Async | Celery + Redis (nightly billing, monthly closing, notifications) |
-| Mobile | Flutter, Riverpod, GoRouter, Dio, flutter_secure_storage |
-| Bot | aiogram 3.x (support requests) |
-| Landing | static HTML, three languages (UZ / RU / EN) |
-| Infra | Docker Compose, nginx reverse proxy, Let's Encrypt |
-| Testing | pytest + pytest-django, `TransactionTestCase` for concurrency |
+| Baza | PostgreSQL 15 |
+| Fon vazifalari | Celery + Redis (kunlik to'lov, oylik yopilish, bildirishnomalar) |
+| Mobil ilova | Flutter, Riverpod, GoRouter, Dio, flutter_secure_storage |
+| Bot | aiogram 3.x (yordam so'rovlari) |
+| Sayt | statik HTML, uch til (UZ / RU / EN) |
+| Deploy | Docker Compose, nginx, Let's Encrypt |
+| Testlar | pytest + pytest-django, parallellik uchun `TransactionTestCase` |
 
-## Status
+## Holat
 
-- Backend running in production at `api.mobirex.uz`
-- Android app **published on Google Play**
-- iOS app **in App Store review**
-- Landing site live at [mobirex.uz](https://mobirex.uz)
-- No paying customers yet — the product is live and in early use
+| Nima | Holati |
+|---|---|
+| Sayt | **Ishlayapti** — [mobirex.uz](https://mobirex.uz) |
+| Backend | **Ishlayapti** — production serverda, `api.mobirex.uz` |
+| Mobil ilova | Qurilgan va jonli backend bilan ishlaydi |
+| Google Play | **Ichki test (internal testing) trekida** — hali ommaviy ro'yxatda emas |
+| App Store | **Ko'rikka yuborilgan, hali tasdiqlanmagan** |
+| Mijozlar | Hali to'lovchi mijoz yo'q — ilova erta foydalanish bosqichida |
 
-## Author
+Ilova hozircha ikkala do'kondan ham yuklab olinmaydi; do'konlarda chop etish
+jarayoni davom etmoqda.
 
-**Zohidillo Turgunov** — sole developer. Backend, mobile app, Telegram bot,
-landing site and deployment.
+## Havolalar
 
-## License
+| | |
+|---|---|
+| **Sayt** | https://mobirex.uz |
+| **Backend (ochiq endpoint)** | https://api.mobirex.uz/api/regions/ — autentifikatsiyasiz ishlaydigan jonli endpoint, JSON qaytaradi |
 
-MIT — see [LICENSE](LICENSE).
+Backend ildiz manzili `api.mobirex.uz` — admin panelning kirish sahifasi. API
+qismi to'liq autentifikatsiya talab qiladi, shuning uchun yuqorida ochiq
+endpoint havolasi berilgan: u tizimning javob konvertini
+(`{"success": true, "data": {...}}`) ham ko'rsatadi.
+
+## Muallif
+
+**Zohidillo Turgunov**
+
+Loyihaning hamma qismi bir kishi tomonidan yozilgan: Django backend, Flutter
+mobil ilova, Telegram bot, landing sayt, Docker infratuzilmasi va serverga
+deploy.
+
+## Litsenziya
+
+MIT — [LICENSE](LICENSE) faylida.
 
 ---
 
-## Qisqacha (o'zbekcha)
+## English summary
 
-**Mobirex** — O'zbekistondagi telefon va aksessuar do'konlari uchun CRM/ERP
-tizimi. Do'konlar hisobni daftar, Excel va Telegramda yuritadi; natijada egasi
-oddiy savollarga javob bera olmaydi: bugun kim nima sotdi, qaysi filialda qancha
-pul bor, kim qarzdor, o'tgan oyda foyda qancha bo'ldi.
+**Mobirex** is a CRM/ERP system for phone and accessory retail shops in
+Uzbekistan. Shops currently track stock, sales, staff salaries and customer
+debt in paper notebooks, Excel and Telegram, which means the owner cannot answer
+basic questions about cash, debt or profit. Mobirex models the shop as it
+actually works: phone and accessory capital are financially independent pools,
+access is isolated by branch → role → domain, debt is bidirectional, and at
+month end unsold stock rolls into the next month while the closed month's
+dashboard is frozen into a snapshot.
 
-Tizim do'konning haqiqiy ish tartibini modellashtiradi: telefon va aksessuar
-kapitali bir-biriga aralashmaydi, har bir xodim faqat o'z filiali va o'z
-yo'nalishini ko'radi, qarz ikki tomonlama ("berdik" / "oldik") yuritiladi, oy
-oxirida sotilmagan tovar keyingi oyga o'tkaziladi va yopilgan oy hisoboti
-snapshot sifatida muzlatiladi.
+The stack is Django 5.2 + DRF + PostgreSQL with Celery/Redis for background
+work, and a Flutter (Riverpod) mobile client. The landing site and the
+production backend are both live; the Android build is on an internal testing
+track and the iOS build is in App Store review, so the app is not yet publicly
+downloadable. There are no paying customers yet.
 
-Backend Django 5.2 + DRF + PostgreSQL, mobil ilova Flutter (Riverpod), fon
-vazifalari Celery + Redis, deploy Docker Compose + nginx orqali. Backend
-`api.mobirex.uz` da ishlab turibdi, Android ilova Google Play'da chop etilgan,
-iOS versiyasi App Store ko'rigida.
+**This repository is a selection (35 files) from a larger private codebase**,
+prepared for the President Tech Award application, which asks for part of the
+project's code. Files were chosen to show engineering decisions — idempotent
+month-close under `select_for_update`, capital isolation, subscription billing,
+deduplicated error reporting, the mobile token-refresh queue — rather than
+volume. No credentials, keys or server addresses appear anywhere in it.
 
-**Bu repozitoriyda loyihaning butun kodi emas, tanlangan qismi** (39 fayl)
-joylashtirilgan — ariza shakli aynan kodning bir qismini so'ragani uchun.
-Tanlashda hajm emas, muhandislik yechimi ko'rinadigan fayllar olindi: oy yopish
-xizmati (idempotentlik, `select_for_update`, rollover), kapital izolyatsiyasi,
-obuna to'lovi, xatoliklarni Telegram'ga yuborish, mobil tomondagi JWT refresh
-navbati va testlar. Hech qanday maxfiy ma'lumot — token, parol, kalit, server
-IP'si — bu yerda yo'q; konfiguratsiya fayllarida faqat placeholder qiymatlar
-turibdi.
-
-Loyihani bir kishi — **Zohidillo Turgunov** — yakka o'zi ishlab chiqqan.
+Built solo by **Zohidillo Turgunov**.
