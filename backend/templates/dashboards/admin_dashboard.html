@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Admin boshqaruv paneli" %}{% endblock %}
+{% block page_title %}{% trans "Admin boshqaruv paneli" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Jami filiallar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.total_branches|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Jami foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.total_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Faol foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.active_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Bloklangan foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.blocked_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 md:col-span-2 lg:col-span-1">
+            <div class="text-gray-400 text-sm">{% trans "To‘lov daromadi" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.subscription_income_this_month|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 md:col-span-2 lg:col-span-1">
+            <div class="text-gray-400 text-sm">{% trans "Imtiyozli foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.vip_users|default:"0" }}</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Oylik daromad" %}</div>
+            <div class="min-w-[320px]">
+                <canvas id="incomeChart" height="160"></canvas>
+            </div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Foydalanuvchi holati taqsimoti" %}</div>
+            <div class="min-w-[320px]">
+                <canvas id="statusChart" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 mt-4">
+        <div class="text-gray-300 text-sm mb-3">{% trans "So‘nggi to‘lovlar" %}</div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-800">
+                <thead>
+                    <tr class="text-gray-400 uppercase text-xs">
+                        <th class="py-2 text-left">{% trans "To‘lov ID" %}</th>
+                        <th class="py-2 text-left">{% trans "Foydalanuvchi" %}</th>
+                        <th class="py-2 text-left">{% trans "Summa" %}</th>
+                        <th class="py-2 text-left">{% trans "Sana" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                    {% if data.last_payments %}
+                        {% for item in data.last_payments %}
+                            <tr class="hover:bg-gray-800 transition">
+                                <td class="py-3">#{{ item.id }}</td>
+                                <td class="py-3">{{ item.user__username|default:item.user_id }}</td>
+                                <td class="py-3">{{ item.amount }}</td>
+                                <td class="py-3">{{ item.added_at|date:"DATETIME_FORMAT" }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-400">{% trans "Ma’lumot topilmadi" %}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block charts %}
+<script>
+    const incomeCtx = document.getElementById('incomeChart');
+    if (incomeCtx) {
+        new Chart(incomeCtx, {
+            type: 'line',
+            data: {
+                labels: [{% for item in data.monthly_income_series %}'{{ item.month }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: '{% trans "Daromad" %}',
+                    data: [{% for item in data.monthly_income_series %}{{ item.amount|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56,189,248,0.15)',
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#e5e7eb' } } },
+                scales: {
+                    x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                    y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+                }
+            }
+        });
+    }
+
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for item in data.user_status_distribution %}'{% if item.status == "active" %}{% trans "Faol" %}{% elif item.status == "grace" %}{% trans "Imtiyoz muddati" %}{% elif item.status == "blocked" %}{% trans "Bloklangan" %}{% elif item.status == "vip" %}{% trans "Imtiyozli" %}{% else %}{{ item.status }}{% endif %}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for item in data.user_status_distribution %}{{ item.count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#38bdf8'],
+                }]
+            },
+            options: {
+                plugins: { legend: { labels: { color: '#e5e7eb' } } }
+            }
+        });
+    }
+</script>
+{% endblock %}

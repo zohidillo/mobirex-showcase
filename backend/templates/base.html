@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Mobirex{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/mobirex_logo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css">
+    {% block extra_css %}{% endblock %}
+    <style>
+        [x-cloak]{display:none !important;}
+        body.sidebar-open {
+            overflow: hidden;
+        }
+        @media (max-width: 1023px) {
+            input,
+            select,
+            textarea,
+            .ts-control,
+            .ts-control input,
+            .ts-dropdown {
+                font-size: 16px !important;
+            }
+        }
+        select,
+        select.form-select,
+        select.tom-select {
+            background-color: #111827;
+            color: #f9fafb;
+            border-color: #374151;
+            color-scheme: dark;
+        }
+        select:hover,
+        select.form-select:hover,
+        select.tom-select:hover {
+            border-color: #4b5563;
+        }
+        select:focus,
+        select.form-select:focus,
+        select.tom-select:focus {
+            background-color: #111827;
+            color: #f9fafb;
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+        }
+        select:disabled,
+        select.form-select:disabled,
+        select.tom-select:disabled {
+            background-color: #0f172a;
+            color: #94a3b8;
+            border-color: #334155;
+            opacity: 1;
+        }
+        select option,
+        select optgroup {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        select option:checked,
+        select option[selected] {
+            background-color: #1e3a5f;
+            color: #ffffff;
+        }
+        .ts-wrapper.single .ts-control,
+        .ts-wrapper.multi .ts-control {
+            background-color: #111827;
+            color: #f9fafb;
+            border-color: #374151;
+            box-shadow: none;
+        }
+        .ts-wrapper.single:hover .ts-control,
+        .ts-wrapper.multi:hover .ts-control {
+            border-color: #4b5563;
+        }
+        .ts-wrapper.focus .ts-control,
+        .ts-wrapper.single.input-active .ts-control,
+        .ts-wrapper.multi.input-active .ts-control {
+            background-color: #111827;
+            color: #f9fafb;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+        }
+        .ts-wrapper.disabled .ts-control,
+        .ts-wrapper.disabled.single .ts-control,
+        .ts-wrapper.disabled.multi .ts-control {
+            background-color: #0f172a;
+            color: #94a3b8;
+            border-color: #334155;
+            opacity: 1;
+        }
+        .ts-wrapper.single .ts-control:after {
+            border-color: #cbd5e1 transparent transparent transparent;
+        }
+        .ts-wrapper.single.input-active .ts-control:after {
+            border-color: transparent transparent #cbd5e1 transparent;
+        }
+        .ts-control input,
+        .ts-control > div {
+            color: #f9fafb;
+        }
+        .ts-control input::placeholder {
+            color: #9ca3af;
+        }
+        .ts-wrapper.multi .ts-control > div {
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+        .ts-dropdown {
+            background-color: #111827;
+            color: #f9fafb;
+            border-color: #374151;
+        }
+        .ts-dropdown .dropdown-header,
+        .ts-dropdown .optgroup-header,
+        .ts-dropdown .no-results,
+        .ts-dropdown .create {
+            background-color: #111827;
+            color: #cbd5e1;
+        }
+        .ts-dropdown .option {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        .ts-dropdown .option.active,
+        .ts-dropdown .option:hover,
+        .ts-dropdown .create:hover {
+            background-color: #1f2937;
+            color: #ffffff;
+        }
+        .ts-dropdown .option.selected,
+        .ts-dropdown .active.selected {
+            background-color: #1e3a5f;
+            color: #ffffff;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            min-height: 44px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-secondary {
+            background-color: #1f2937;
+            color: #f3f4f6;
+        }
+        .btn-secondary:hover {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100">
+
+<div class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <div
+        id="mobile-sidebar"
+        aria-hidden="true"
+        class="fixed inset-y-0 left-0 z-50 w-64 -translate-x-full bg-gray-900 transform transition-transform duration-300 lg:static lg:inset-0 lg:translate-x-0"
+    >
+        {% include "widgets/sidebar.html" %}
+    </div>
+
+    <!-- OVERLAY -->
+    <div
+        id="mobile-sidebar-overlay"
+        aria-hidden="true"
+        class="fixed inset-0 z-40 bg-black bg-opacity-50 opacity-0 pointer-events-none transition-opacity duration-200 lg:hidden"
+    ></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex flex-col flex-1 w-full">
+
+        {% include "widgets/navbar.html" %}
+
+        <main class="flex-1 overflow-y-auto p-3 md:p-6">
+
+            {% include "widgets/messages.html" %}
+            {% if account_warning_message %}
+                <div class="mb-4 rounded-xl border border-amber-800 bg-amber-950/60 px-4 py-3 text-sm text-amber-200">
+                    {{ account_warning_message }}
+                </div>
+            {% endif %}
+            {% if back_url %}
+                {% include "widgets/back_button.html" %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<!-- Chart.js oldin -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+    (() => {
+        if (window.__crmMobileSidebarInitialized) {
+            return;
+        }
+
+        window.__crmMobileSidebarInitialized = true;
+
+        const sidebar = document.getElementById('mobile-sidebar');
+        const overlay = document.getElementById('mobile-sidebar-overlay');
+        const toggle = document.getElementById('mobile-sidebar-toggle');
+
+        if (!sidebar || !overlay || !toggle) {
+            return;
+        }
+
+        const desktopMedia = window.matchMedia('(min-width: 1024px)');
+        let sidebarOpen = false;
+
+        function setSidebarState(open) {
+            sidebarOpen = open && !desktopMedia.matches;
+
+            sidebar.classList.toggle('-translate-x-full', !sidebarOpen);
+            sidebar.classList.toggle('translate-x-0', sidebarOpen);
+            sidebar.setAttribute('aria-hidden', desktopMedia.matches ? 'false' : String(!sidebarOpen));
+
+            overlay.classList.toggle('opacity-0', !sidebarOpen);
+            overlay.classList.toggle('pointer-events-none', !sidebarOpen);
+            overlay.classList.toggle('opacity-100', sidebarOpen);
+            overlay.setAttribute('aria-hidden', String(!sidebarOpen));
+
+            toggle.setAttribute('aria-expanded', String(sidebarOpen));
+            document.body.classList.toggle('sidebar-open', sidebarOpen);
+        }
+
+        function closeSidebar() {
+            setSidebarState(false);
+        }
+
+        toggle.addEventListener('click', function() {
+            if (desktopMedia.matches) {
+                return;
+            }
+
+            setSidebarState(!sidebarOpen);
+        });
+
+        overlay.addEventListener('click', closeSidebar);
+
+        sidebar.addEventListener('click', function(event) {
+            if (!desktopMedia.matches && event.target.closest('a[href]')) {
+                closeSidebar();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+
+        function syncSidebarState() {
+            closeSidebar();
+            sidebar.setAttribute('aria-hidden', desktopMedia.matches ? 'false' : 'true');
+        }
+
+        if (typeof desktopMedia.addEventListener === 'function') {
+            desktopMedia.addEventListener('change', syncSidebarState);
+        } else {
+            desktopMedia.addListener(syncSidebarState);
+        }
+
+        window.addEventListener('pageshow', closeSidebar);
+
+        syncSidebarState();
+    })();
+</script>
+
+<!-- charts keyin -->
+{% block charts %}{% endblock %}
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

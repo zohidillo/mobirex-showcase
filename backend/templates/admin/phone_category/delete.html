@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Telefon kategoriyasini o‘chirish" %}{% endblock %}
+{% block page_title %}{% trans "Telefon kategoriyasini o‘chirish" %}{% endblock %}
+
+{% block content %}
+<div class="p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="max-w-xl mx-auto">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl shadow-lg p-5">
+            <h1 class="text-xl font-bold mb-2">{% trans "Telefon kategoriyasini o‘chirish" %}</h1>
+            <p class="text-gray-300 mb-4">{% trans "Ushbu kategoriyani o‘chirishni tasdiqlaysizmi?" %}</p>
+            <div class="bg-gray-800 rounded-lg p-3 mb-4">
+                <div class="text-gray-100 font-semibold">{{ object.name }}</div>
+            </div>
+            <form method="post" class="space-y-3">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "O‘chirish" %}</button>
+                <a href="{% url 'admin_phone_category_list' %}" class="block text-center bg-gray-800 hover:bg-gray-700 text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

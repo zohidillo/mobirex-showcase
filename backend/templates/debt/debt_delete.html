@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Qarzni o‘chirish" %}{% endblock %}
+{% block page_title %}{% trans "Qarzni o‘chirish" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-2">{% trans "Qarzni o‘chirish" %}</h2>
+        <p class="text-gray-300 mb-4">{% trans "Ushbu qarzni o‘chirishni tasdiqlaysizmi?" %}</p>
+        <p class="text-amber-300 mb-4">{% trans "Ushbu qarz va unga bog‘liq barcha to‘lovlar o‘chiriladi." %}</p>
+
+        <div class="bg-gray-800 rounded-lg p-3 mb-4">
+            <div class="text-gray-100 font-semibold">
+                {% if object.f_name %}
+                    {{ object.f_name }}
+                {% else %}
+                    {% trans "Qo‘lda kiritilgan qarz" %}
+                {% endif %}
+            </div>
+            <div class="text-gray-400 text-sm">{% trans "Summa" %}: {{ object.amount }}</div>
+            <div class="text-xs mt-1 px-2 py-1 inline-block rounded-lg {% if object.direction == 'WE_GAVE' %}bg-green-900 text-green-300{% else %}bg-red-900 text-red-300{% endif %}">
+                {{ object.get_direction_display }}
+            </div>
+        </div>
+
+        <form method="post" class="space-y-2">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "O‘chirish" %}</button>
+            <a href="{% url 'debt_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

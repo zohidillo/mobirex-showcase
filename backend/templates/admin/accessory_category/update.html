@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Aksessuar kategoriyasini tahrirlash" %}{% endblock %}
+{% block page_title %}{% trans "Aksessuar kategoriyasini tahrirlash" %}{% endblock %}
+
+{% block content %}
+<div class="p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="max-w-xl mx-auto">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl shadow-lg p-5">
+            <h1 class="text-xl font-bold mb-4">{% trans "Aksessuar kategoriyasini tahrirlash" %}</h1>
+            {% if form.non_field_errors %}
+                <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">{% trans "Kategoriya nomi" %}</label>
+                    <input name="name" value="{{ form.name.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                    {% if form.name.errors %}<div class="text-red-400 text-sm mt-1">{{ form.name.errors|striptags }}</div>{% endif %}
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Saqlash" %}</button>
+                <a href="{% url 'admin_accessory_category_list' %}" class="block text-center bg-gray-800 hover:bg-gray-700 text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

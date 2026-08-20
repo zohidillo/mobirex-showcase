@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Egasi paneli" %}{% endblock %}
+{% block page_title %}{% trans "Egasi paneli" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Telefon kapitali" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.phone_capital.current_balance|default:"0" }}</div>
+            <div class="text-gray-400 text-xs mt-1">{% trans "Tikilgan pul" %}: {{ data.phone_capital.invested_amount|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Aksessuar kapitali" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.accessory_capital.current_balance|default:"0" }}</div>
+            <div class="text-gray-400 text-xs mt-1">{% trans "Tikilgan pul" %}: {{ data.accessory_capital.invested_amount|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Foyda" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.profit_summary.net_profit|default:"0" }}</div>
+            <div class="text-gray-400 text-xs mt-1">{% trans "Qo‘shimcha foyda" %}: {{ data.profit_summary.extra_profit|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Qarz" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.debt_summary.remaining_we_gave|default:"0" }}</div>
+            <div class="text-gray-400 text-xs mt-1">{% trans "Biz olgan" %}: {{ data.debt_summary.remaining_we_took|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 md:col-span-2 lg:col-span-1">
+            <div class="text-gray-400 text-sm">{% trans "Xarajatlar" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ data.expense_summary.shop_expense_total|default:"0" }}</div>
+            <div class="text-gray-400 text-xs mt-1">{% trans "Xodim" %}: {{ data.expense_summary.employee_expense_total|default:"0" }}</div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 mt-4 overflow-x-auto">
+        <div class="text-gray-300 text-sm mb-2">{% trans "Foyda trendi" %}</div>
+        <div class="min-w-[320px]">
+            <canvas id="ownerFoydaChart" height="160"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 mt-4">
+        <div class="text-gray-300 text-sm mb-3">{% trans "So‘nggi faoliyat" %}</div>
+        {% if data.last_transactions %}
+            <div class="space-y-2">
+                {% for item in data.last_transactions %}
+                    <div class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-3 min-h-[44px]">
+                        <div class="text-sm text-gray-200">
+                            {% if item.type == "PHONE_SALE" %}
+                                {% trans "Telefon savdosi" %}
+                            {% elif item.type == "ACCESSORY_SALE" %}
+                                {% trans "Aksessuar savdosi" %}
+                            {% elif item.type == "EXPENSE" %}
+                                {% trans "Xarajat" %}
+                            {% elif item.type == "SALARY" %}
+                                {% trans "Oylik" %}
+                            {% elif item.type == "EXTRA_PROFIT" %}
+                                {% trans "Qo‘shimcha foyda" %}
+                            {% elif item.type == "DEBT_PAYMENT" %}
+                                {% trans "Qarz to‘lovi" %}
+                            {% else %}
+                                {{ item.type }}
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-300">{{ item.amount }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center text-gray-400 py-6">{% trans "Ma’lumot topilmadi" %}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block charts %}
+<script>
+    const ownerFoydaCtx = document.getElementById('ownerFoydaChart');
+    if (ownerFoydaCtx) {
+        new Chart(ownerFoydaCtx, {
+            type: 'line',
+            data: {
+                labels: ['Yan','Fev','Mar','Apr','May','Iyun'],
+                datasets: [{
+                    label: '{% trans "Foyda" %}',
+                    data: [1200, 1800, 900, 2200, 1600, 2400],
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.15)',
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#e5e7eb' } } },
+                scales: {
+                    x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                    y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

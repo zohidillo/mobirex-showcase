@@ -1,0 +1,42 @@
+{% load i18n %}
+<header class="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 sm:px-6">
+    <div class="flex items-center gap-3">
+        <button 
+            id="mobile-sidebar-toggle"
+            type="button"
+            class="lg:hidden p-2 rounded bg-gray-800 min-h-[44px] min-w-[44px]"
+            aria-controls="mobile-sidebar"
+            aria-expanded="false"
+            aria-label="{% trans 'Yon panelni ochish' %}"
+        >
+            ☰
+        </button>
+        <div class="text-base font-semibold text-gray-100">{% block page_title %}{% trans "Boshqaruv paneli" %}{% endblock %}</div>
+    </div>
+
+    <div class="relative" x-data="{ open: false }">
+        <button
+            class="flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 min-h-[44px] text-gray-100"
+            @click="open = !open"
+            @keydown.escape="open = false"
+        >
+            <span class="text-sm font-medium">{{ request.user.username }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-4 h-4">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </button>
+        <div
+            class="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-lg shadow-lg p-2 z-50"
+            x-show="open"
+            x-transition
+            x-cloak
+            @click.outside="open = false"
+        >
+            <div class="px-3 py-2 text-xs text-gray-400">{% trans "Tizimga kirgan" %}</div>
+            <div class="px-3 pb-2 text-sm font-medium text-gray-100">{{ request.user.username }}</div>
+            <a href="{% url 'profile_account' %}" class="block px-3 py-2 rounded-lg text-sm text-gray-100 hover:bg-gray-800 min-h-[44px]">{% trans "Profil" %}</a>
+            <a href="{% url 'profile_change_password' %}" class="block px-3 py-2 rounded-lg text-sm text-gray-100 hover:bg-gray-800 min-h-[44px]">{% trans "Parolni o'zgartirish" %}</a>
+            <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-lg text-sm text-gray-100 hover:bg-gray-800 min-h-[44px]">{% trans "Chiqish" %}</a>
+        </div>
+    </div>
+</header>

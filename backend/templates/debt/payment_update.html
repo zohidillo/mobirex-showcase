@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "To‘lovni tahrirlash" %}{% endblock %}
+{% block page_title %}{% trans "To‘lovni tahrirlash" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-4">{% trans "To‘lovni tahrirlash" %}</h2>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Qarz" %}</label>
+                <select name="debt" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" disabled>
+                    {% for d in form.debt.field.queryset %}
+                        <option value="{{ d.id }}" {% if form.debt.value == d.id|stringformat:"s" %}selected{% endif %}>
+                            {% if d.f_name %}
+                                {{ d.f_name }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form.debt.errors %}<div class="text-red-400 text-sm">{{ form.debt.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Summa" %}</label>
+                <input name="amount" value="{{ form.amount.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.amount.errors %}<div class="text-red-400 text-sm">{{ form.amount.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Izoh" %}</label>
+                <textarea name="note" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100" rows="3">{{ form.note.value|default_if_none:'' }}</textarea>
+                {% if form.note.errors %}<div class="text-red-400 text-sm">{{ form.note.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "To‘lovni yangilash" %}</button>
+                <a href="{% url 'debt_payment_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

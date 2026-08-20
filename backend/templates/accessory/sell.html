@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Aksessuar sotish" %}{% endblock %}
+{% block page_title %}{% trans "Aksessuar sotish" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-4">{% trans "Aksessuar sotish" %}</h2>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Aksessuar" %}</label>
+                <select name="accessory" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Aksessuarni tanlang" %}</option>
+                    {% for acc in form.accessory.field.queryset %}
+                        <option value="{{ acc.id }}" {% if form.accessory.value == acc.id|stringformat:"s" %}selected{% endif %}>{{ acc.name }} ({% trans "Qoldiq" %}: {{ acc.stock }}) {{ acc.unit_cost }}$</option>
+                    {% endfor %}
+                </select>
+                <div class="text-gray-400 text-xs mt-1">{% trans "Qoldiqi bor aksessuarni tanlang." %}</div>
+                {% if form.accessory.errors %}<div class="text-red-400 text-sm">{{ form.accessory.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Soni" %}</label>
+                <input name="quantity" value="{{ form.quantity.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.quantity.errors %}<div class="text-red-400 text-sm">{{ form.quantity.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Jami narx" %}</label>
+                <input name="total_price" value="{{ form.total_price.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.total_price.errors %}<div class="text-red-400 text-sm">{{ form.total_price.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Aksessuar sotish" %}</button>
+                <a href="{% url 'accessory_unsold_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

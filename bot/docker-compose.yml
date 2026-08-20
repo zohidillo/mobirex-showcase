@@ -1,0 +1,30 @@
+services:
+  support_bot:
+    build: .
+    container_name: mobirex_support_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - bot_redis
+    networks:
+      - mobirex_network
+
+  bot_redis:
+    image: redis:7-alpine
+    container_name: mobirex_bot_redis
+    restart: unless-stopped
+    volumes:
+      - bot_redis_data:/data
+    networks:
+      - mobirex_network
+
+volumes:
+  bot_redis_data:
+
+networks:
+  mobirex_network:
+    external: true
+    name: mobirex_network

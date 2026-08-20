@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Aksessuar sotuvchisi paneli" %}{% endblock %}
+{% block page_title %}{% trans "Aksessuar sotuvchisi paneli" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+        <div>
+            <div class="text-xl font-bold text-gray-100">{% trans "Aksessuar sotuvchisi paneli" %}</div>
+            <div class="text-sm text-gray-400">{{ branch.name }}</div>
+        </div>
+        <form method="get" class="flex flex-wrap gap-2">
+            <select name="year" class="tom-select bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                {% for y in year_choices %}
+                    <option value="{{ y }}" {% if y|stringformat:"s" == year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+            <select name="month" class="tom-select bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                {% for value, label in month_choices %}
+                    <option value="{{ value }}" {% if value|stringformat:"s" == month|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Filtrlash" %}</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Tikilgan pul" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ invested_amount }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">Hozirgi balans</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ current_balance }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Foyda" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ accessory_profit }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">Umumiy xarajat</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ total_expense }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">Qarz</div>
+            <div class="text-red-500 text-sm">{% trans "Do‘kon qarzi" %}: {{ store_owes }}</div>
+            <div class="text-gray-100 text-sm">{% trans "Do‘konga qarzdorlar" %}: {{ others_owe }}</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">Xarajat</div>
+            <div class="space-y-1 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Do‘kon xarajati" %}</span><span>{{ shop_expense }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Xodim xarajati" %}</span><span>{{ employee_expense }}</span></div>
+                <div class="flex justify-between font-semibold"><span class="text-gray-200">{% trans "Umumiy xarajat" %}</span><span>{{ total_expense }}</span></div>
+            </div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">Qarz</div>
+            <div class="space-y-1 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Do‘kon qarzi" %}</span><span>{{ store_owes }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Do‘konga qarzdorlar" %}</span><span>{{ others_owe }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "To‘langan qarz" %}</span><span>{{ debt_paid }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Qaytarilgan qarz" %}</span><span>{{ debt_returned }}</span></div>
+            </div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Aksessuar ombori" %}</div>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Turlari" %}</span><span>{{ total_accessory_types }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Umumiy soni" %}</span><span>{{ total_stock }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Ombor qiymati" %}</span><span>{{ total_inventory_value }}</span></div>
+            </div>
+        </div>
+                <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Oylik sotuvlar" %}</div>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Sotilgan qiymat" %}</span><span>{{ total_sold_value }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Sotilgan son" %}</span><span>{{ total_quantity_sold }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">{% trans "Qoldiq qiymat" %}</span><span>{{ remaining_stock_value }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Kunlik sotuvlar" %}</div>
+            <div class="min-w-[280px]">
+                <canvas id="dailySalesChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm mb-2">{% trans "Taqsimot" %}</div>
+            <div class="min-w-[280px]">
+                <canvas id="balancePieChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {% if comparison %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm font-semibold mb-3">O'tgan oyga nisbatan</div>
+            <div class="space-y-3 text-sm">
+
+                {% with m=comparison.previous_month.total_sold_value %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Sotuv</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">/ {{ m.previous }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+                {% with m=comparison.previous_month.accessory_profit %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Foyda</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">/ {{ m.previous }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+                {% with m=comparison.previous_month.total_quantity_sold %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Sotilgan soni</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">/ {{ m.previous }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-300 text-sm font-semibold mb-3">Umumiy davr o'rtachasiga nisbatan</div>
+            <div class="space-y-3 text-sm">
+
+                {% with m=comparison.all_time.total_sold_value %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Sotuv</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">o'rtacha: {{ m.average }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+                {% with m=comparison.all_time.accessory_profit %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Foyda</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">o'rtacha: {{ m.average }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+                {% with m=comparison.all_time.total_quantity_sold %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400">Sotilgan soni</span>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        <span class="text-gray-100">{{ m.current }}</span>
+                        <span class="text-gray-500 text-xs">o'rtacha: {{ m.average }}</span>
+                        {% if m.direction == "up" %}<span class="text-green-400 text-xs">↑ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% elif m.direction == "down" %}<span class="text-red-400 text-xs">↓ {% if m.percent is not None %}{{ m.percent }}%{% else %}Yangi{% endif %}</span>
+                        {% else %}<span class="text-gray-500 text-xs">→ O'zgarish yo'q</span>{% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block charts %}
+<script>
+    const salesSeries = {{ sales_series_json|safe }};
+    const salesLabels = salesSeries.map(item => item.day);
+    const salesData = salesSeries.map(item => item.amount);
+
+    const dailySalesCtx = document.getElementById('dailySalesChart');
+    if (dailySalesCtx) {
+        new Chart(dailySalesCtx, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: '{% trans "Kunlik sotuvlar" %}',
+                    data: salesData,
+                    borderColor: 'rgba(59,130,246,0.9)',
+                    backgroundColor: 'rgba(59,130,246,0.2)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#e5e7eb' } } },
+                scales: {
+                    x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                    y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+                }
+            }
+        });
+    }
+
+    const pieData = {{ pie_data_json|safe }};
+    const pieLabels = pieData.map(item => item.label);
+    const pieValues = pieData.map(item => item.value);
+
+    const balancePieCtx = document.getElementById('balancePieChart');
+    if (balancePieCtx) {
+        new Chart(balancePieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieValues,
+                    backgroundColor: ['#f97316', '#22c55e', '#f43f5e', '#3b82f6']
+                }]
+            },
+            options: {
+                cutout: '65%',
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#e5e7eb' } }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Qarzlar" %}{% endblock %}
+{% block page_title %}{% trans "Qarzlar" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Qarzlar" %}</h1>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'debt_paid_list' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg min-h-[44px]">{% trans "To‘langan qarzlar" %}</a>
+            {% if is_phone_seller or is_accessory_seller %}
+                <a href="{% url 'debt_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg min-h-[44px]">+ {% trans "Qo‘shish" %}</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if is_read_only_month %}
+        <div class="mb-4 rounded-lg border border-amber-700 bg-amber-950/40 px-4 py-3 text-sm text-amber-200">
+            {% trans "Tanlangan oy uchun qarzlar faqat ko‘rish uchun." %}
+        </div>
+    {% endif %}
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <form method="get" class="filter-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "F.I.SH" %}</label>
+                <input name="q" value="{{ q|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Yo‘nalish" %}</label>
+                <select name="type" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barchasi" %}</option>
+                    <option value="WE_GAVE" {% if request.GET.type == "WE_GAVE" %}selected{% endif %}>{% trans "Biz berdik" %}</option>
+                    <option value="WE_TOOK" {% if request.GET.type == "WE_TOOK" %}selected{% endif %}>{% trans "Biz oldik" %}</option>
+                </select>
+            </div>
+            {% if is_owner %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Kiritgan" %}</label>
+                    <select name="created_by" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                        <option value="">{% trans "Barcha kiritganlar" %}</option>
+                        {% for u in branch_users %}
+                            <option value="{{ u.id }}" {% if created_by == u.id|stringformat:"s" %}selected{% endif %}>{{ u.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+            {% if is_owner %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Filial" %}</label>
+                    <select name="branch" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                        <option value="">{% trans "Barcha filiallar" %}</option>
+                        {% for b in owner_branches %}
+                            <option value="{{ b.id }}" {% if branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Yil" %}</label>
+                <select name="year" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for year_option in year_options %}
+                        <option value="{{ year_option }}" {% if year == year_option|stringformat:"s" %}selected{% endif %}>{{ year_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Oy" %}</label>
+                <select name="month" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for month_value, month_label in month_choices %}
+                        <option value="{{ month_value }}" {% if month == month_value|stringformat:"s" %}selected{% endif %}>{{ month_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "To‘lovlar tarixi" %}</label>
+                <select name="history_mode" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for mode_value, mode_label in history_mode_choices %}
+                        <option value="{{ mode_value }}" {% if history_mode == mode_value %}selected{% endif %}>{{ mode_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-span-full flex gap-2 items-end">
+                <button type="submit" class="btn btn-primary">{% trans "Filtrlash" %}</button>
+                <a href="{{ request.path }}" class="btn btn-secondary">{% trans "Tozalash" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for debt in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-lg font-bold text-gray-100">
+                            {% if debt.f_name %}
+                                {{ debt.f_name }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %}
+                            {% endif %}
+                        </div>
+                        <div class="text-gray-300 text-sm">
+                            {% trans "Summa" %}:
+                            {% if debt.debt_id %}
+                                {{ debt.debt.amount }}
+                            {% else %}
+                                {{ debt.amount }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-xs px-2 py-1 rounded-lg {% if debt.direction == 'WE_GAVE' %}bg-green-900 text-green-300{% else %}bg-red-900 text-red-300{% endif %}">
+                        {{ debt.get_direction_display }}
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-300">{% trans "Qoldiq" %}: {{ debt.remaining_amount }}</div>
+                {% if is_owner %}
+                    <div class="text-sm text-gray-300">{% trans "Filial" %}: {{ debt.branch.name }}</div>
+                {% endif %}
+                <div class="text-sm text-gray-300">{% trans "Kiritgan" %}: {{ debt.created_by.username }}</div>
+                {% if debt.note %}<div class="text-sm text-gray-300">{% trans "Izoh" %}: {{ debt.note }}</div>{% endif %}
+                <div class="text-xs text-gray-400">
+                    {% trans "Kiritilgan" %}:
+                    {% if debt.debt_id %}
+                        {{ debt.original_created_at|date:"DATETIME_FORMAT" }}
+                    {% else %}
+                        {{ debt.added_at|date:"DATETIME_FORMAT" }}
+                    {% endif %}
+                </div>
+                <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <button
+                        type="button"
+                        class="bg-gray-800 hover:bg-gray-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center"
+                        data-payments-modal-trigger
+                        data-template-id="payments-template-{{ debt.pk }}"
+                        data-debt-title="{% if debt.f_name %}{{ debt.f_name }}{% else %}{% trans "Qo‘lda kiritilgan qarz" %}{% endif %}"
+                    >
+                        {% trans "To‘lovlarni ko‘rish" %}
+                    </button>
+                    {% if not is_read_only_month %}
+                        <a href="{% url 'debt_delete' debt.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center">{% trans "O‘chirish" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Qarzlar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "F.I.SH" %}</th>
+                    <th class="py-2 text-left">{% trans "Summa" %}</th>
+                    <th class="py-2 text-left">{% trans "Qoldiq" %}</th>
+                    <th class="py-2 text-left">{% trans "Yo‘nalish" %}</th>
+                    <th class="py-2 text-left">{% trans "Izoh" %}</th>
+                    <th class="py-2 text-left">{% trans "Kiritgan" %}</th>
+                    {% if is_owner %}
+                        <th class="py-2 text-left">{% trans "Filial" %}</th>
+                    {% endif %}
+                    <th class="py-2 text-left">{% trans "Sana" %}</th>
+                    <th class="py-2 text-left">{% trans "Amallar" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for debt in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">
+                            {% if debt.f_name %}
+                                {{ debt.f_name }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %}
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            {% if debt.debt_id %}
+                                {{ debt.debt.amount }}
+                            {% else %}
+                                {{ debt.amount }}
+                            {% endif %}
+                        </td>
+                        <td class="py-3">{{ debt.remaining_amount }}</td>
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-lg {% if debt.direction == 'WE_GAVE' %}bg-green-900 text-green-300{% else %}bg-red-900 text-red-300{% endif %}">{{ debt.get_direction_display }}</span>
+                        </td>
+                        <td class="py-3">{{ debt.note }}</td>
+                        <td class="py-3">{{ debt.created_by.username }}</td>
+                        {% if is_owner %}
+                            <td class="py-3">{{ debt.branch.name }}</td>
+                        {% endif %}
+                        <td class="py-3">
+                            {% if debt.debt_id %}
+                                {{ debt.original_created_at|date:"DATETIME_FORMAT" }}
+                            {% else %}
+                                {{ debt.added_at|date:"DATETIME_FORMAT" }}
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            <div class="flex gap-2">
+                                <button
+                                    type="button"
+                                    class="bg-gray-800 hover:bg-gray-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]"
+                                    data-payments-modal-trigger
+                                    data-template-id="payments-template-{{ debt.pk }}"
+                                    data-debt-title="{% if debt.f_name %}{{ debt.f_name }}{% else %}{% trans "Qo‘lda kiritilgan qarz" %}{% endif %}"
+                                >
+                                    {% trans "To‘lovlarni ko‘rish" %}
+                                </button>
+                                {% if not is_read_only_month %}
+                                    <a href="{% url 'debt_delete' debt.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]">{% trans "O‘chirish" %}</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if is_owner %}9{% else %}8{% endif %}" class="py-6 text-center text-gray-400">{% trans "Qarzlar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% for debt in object_list %}
+        <template id="payments-template-{{ debt.pk }}">
+            {% include "debt/_payment_history_content.html" with debt=debt history_mode=history_mode %}
+        </template>
+    {% endfor %}
+{% include "widgets/pagination.html" %}
+</div>
+{% include "debt/_payment_history_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

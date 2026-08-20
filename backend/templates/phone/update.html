@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Telefonni yangilash" %}{% endblock %}
+{% block page_title %}{% trans "Telefonni yangilash" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-xl bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-4">{% trans "Telefonni yangilash" %}</h2>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Nomi" %}</label>
+                <input name="name" value="{{ form.name.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.name.errors %}<div class="text-red-400 text-sm">{{ form.name.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Kategoriya" %}</label>
+                <select name="category" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Kategoriyani tanlang" %}</option>
+                    {% for cat in form.category.field.queryset %}
+                        <option value="{{ cat.id }}" {% if form.category.value == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.category.errors %}<div class="text-red-400 text-sm">{{ form.category.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Xotira" %}</label>
+                <select name="storage" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Xotirani tanlang" %}</option>
+                    {% for value, label in form.storage.field.choices %}
+                        <option value="{{ value }}" {% if form.storage.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.storage.errors %}<div class="text-red-400 text-sm">{{ form.storage.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Rang" %}</label>
+                <input name="color" value="{{ form.color.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.color.errors %}<div class="text-red-400 text-sm">{{ form.color.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Qayerdan olingan" %}</label>
+                <input name="from_by" value="{{ form.from_by.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.from_by.errors %}<div class="text-red-400 text-sm">{{ form.from_by.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "IMEI" %}</label>
+                <input name="imei" value="{{ form.imei.value|default_if_none:'' }}" readonly class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100 opacity-75" />
+                {% if form.imei.errors %}<div class="text-red-400 text-sm">{{ form.imei.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Tannarx" %}</label>
+                <input name="cost_price" value="{{ form.cost_price.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.cost_price.errors %}<div class="text-red-400 text-sm">{{ form.cost_price.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Telefonni yangilash" %}</button>
+                <a href="{% url 'phone_unsold_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

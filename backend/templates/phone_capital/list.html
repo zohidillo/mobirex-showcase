@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Telefon kapitali" %}{% endblock %}
+{% block page_title %}{% trans "Telefon kapitali" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Telefon kapitali" %}</h1>
+        <a href="{% url 'phone_capital_create' %}?branch={{ capital.branch.id }}&month={{ capital.month|date:'m' }}&year={{ capital.month|date:'Y' }}"
+           class="bg-green-600 hover:bg-green-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center">{% trans "Kapital qo‘shish" %}</a>
+
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for capital in object_list %}
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="flex items-start justify-between gap-3">
+                <div class="text-lg font-bold text-gray-100">{{ capital.branch.name }}</div>
+                <div class="text-sm text-gray-300">{{ capital.month|date:"F Y" }}</div>
+            </div>
+            <div class="mt-2 text-sm text-gray-300">{% trans "Oy" %}: {{ capital.month|date:"F" }}</div>
+            <div class="text-sm text-gray-300">{% trans "Yil" %}: {{ capital.month|date:"Y" }}</div>
+            <div class="text-sm text-gray-300">{% trans "Tikilgan pul" %}: {{ capital.invested_amount }}</div>
+            <div class="text-sm text-gray-300">{% trans "Hozirgi balans" %}: {{ capital.current_balance }}</div>
+            <div class="mt-3 grid grid-cols-1 gap-2">
+                {% if capital.pk %}
+                <form method="post" action="{% url 'phone_capital_reset' capital.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-full bg-red-600 hover:bg-red-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">
+                        {% trans "Qayta nolga tushirish" %}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-400 py-10">{% trans "Telefon kapitali yozuvlari topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+            <tr class="text-gray-400 uppercase text-xs">
+                <th class="py-2 text-left">{% trans "Filial" %}</th>
+                <th class="py-2 text-left">{% trans "Oy" %}</th>
+                <th class="py-2 text-left">{% trans "Yil" %}</th>
+                <th class="py-2 text-left">{% trans "Tikilgan pul" %}</th>
+                <th class="py-2 text-left">{% trans "Hozirgi balans" %}</th>
+                <th class="py-2 text-left">{% trans "Amallar" %}</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+            {% for capital in object_list %}
+            <tr class="hover:bg-gray-800 transition">
+                <td class="py-3">{{ capital.branch.name }}</td>
+                <td class="py-3">{{ capital.month|date:"F" }}</td>
+                <td class="py-3">{{ capital.month|date:"Y" }}</td>
+                <td class="py-3">{{ capital.invested_amount }}</td>
+                <td class="py-3">{{ capital.current_balance }}</td>
+                <td class="py-3">
+                    <div class="flex flex-wrap gap-2">
+
+                        {% if capital.pk %}
+                        <form method="post" action="{% url 'phone_capital_reset' capital.pk %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="bg-red-600 hover:bg-red-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]">
+                                {% trans "Qayta nolga tushirish" %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="py-6 text-center text-gray-400">{% trans "Telefon kapitali yozuvlari topilmadi" %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "widgets/pagination.html" %}
+</div>
+{% endblock %}

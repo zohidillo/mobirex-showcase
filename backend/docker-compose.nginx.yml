@@ -1,0 +1,43 @@
+# Markaziy nginx + certbot
+# Backend (web/db/redis), bot va landing — bittasi mobirex_network'da
+# Bu compose alohida ishga tushiriladi (asosiy docker-compose.yml dan keyin)
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: mobirex_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ../landing:/var/www/mobirex-landing:ro
+      - static_files:/var/www/static:ro
+      - media_files:/var/www/media:ro
+    networks:
+      - mobirex_network
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: mobirex_certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  static_files:
+    external: true
+    name: mobirex_static_files
+  media_files:
+    external: true
+    name: mobirex_media_files
+
+networks:
+  mobirex_network:
+    external: true
+    name: mobirex_network

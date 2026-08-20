@@ -1,0 +1,12 @@
+stages:
+  - deploy
+
+deploy_production:
+  stage: deploy
+  tags:
+    - production
+  only:
+    - main
+  script:
+    - docker compose -f /root/velmora/docker-compose.yml down
+    - docker compose -f /root/velmora/docker-compose.yml up -d --build

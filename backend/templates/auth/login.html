@@ -1,0 +1,67 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% trans "Kirish" %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/mobirex_logo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #030712; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div class="mb-6 text-center">
+            <img src="{% static 'img/mobirex_logo.png' %}"
+                 alt="Mobirex"
+                 class="w-16 h-16 rounded-2xl mx-auto mb-4">
+            <h1 class="text-2xl font-semibold text-white">Mobirex</h1>
+            <p class="text-xs text-gray-500 mt-1">{% trans "Telefon va aksessuar do'konlari uchun CRM" %}</p>
+            <p class="text-sm text-gray-400 mt-3">{% trans "Davom etish uchun kiring" %}</p>
+        </div>
+
+        {% if messages %}
+            <div class="space-y-2 mb-4">
+                {% for message in messages %}
+                    <div class="bg-red-900/40 border border-red-700 text-red-300 rounded-lg p-3 text-sm text-center">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2" for="username">{% trans "Foydalanuvchi nomi" %}</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2" for="password">{% trans "Parol" %}</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                />
+            </div>
+            <button
+                type="submit"
+                class="w-full bg-[#DF6C00] hover:bg-[#c25e00] text-white font-medium py-3 rounded-lg transition duration-200"
+            >
+                {% trans "Kirish" %}
+            </button>
+        </form>
+    </div>
+</body>
+</html>

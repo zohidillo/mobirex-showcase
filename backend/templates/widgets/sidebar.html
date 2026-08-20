@@ -1,0 +1,276 @@
+{% load i18n %}
+{% load static %}
+<div class="h-full overflow-y-auto p-4">
+    <div class="h-12 flex items-center gap-2.5 px-2 mb-4">
+        <img src="{% static 'img/mobirex_logo.png' %}"
+             alt="Mobirex"
+             class="w-8 h-8 rounded-lg shrink-0">
+        <div class="text-lg font-semibold tracking-tight text-gray-100">Mobirex</div>
+    </div>
+    <nav class="space-y-1">
+        {% if request.user.is_superuser %}
+            <a href="{% url 'admin-dashboard' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Boshqaruv paneli" %}</span>
+            </a>
+            <a href="{% url 'admin_branch_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/branch.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Filiallar" %}</span>
+            </a>
+            <a href="{% url 'admin_user_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/users.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Foydalanuvchilar" %}</span>
+            </a>
+            <a href="{% url 'admin_account_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/subscription.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Hisoblar" %}</span>
+            </a>
+            <a href="{% url 'admin_branch_user_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/users.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Filial rollari" %}</span>
+            </a>
+            <a href="{% url 'cashier_payment_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "To‘lovlar" %}</span>
+            </a>
+            <a href="{% url 'cashier_transaction_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Tranzaksiyalar" %}</span>
+            </a>
+            <a href="{% url 'admin_phone_category_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/phone.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Telefon kategoriyalari" %}</span>
+            </a>
+            <a href="{% url 'admin_accessory_category_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/accessory.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Aksessuar kategoriyalari" %}</span>
+            </a>
+            <a href="{% url 'admin_support_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Murojaatlar" %}</span>
+                {% if unread_support_count and unread_support_count > 0 %}
+                    <span class="ml-auto bg-red-600 text-white text-xs rounded-full px-2 py-1">{{ unread_support_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'journal_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Jurnal" %}</span>
+            </a>
+        {% elif is_owner %}
+            {% with current_url=request.resolver_match.url_name %}
+                <div
+                    x-data="{
+                        openPhones: {% if current_url == 'phone_unsold_list' or current_url == 'phone_sold_list' or current_url == 'admin_phone_category_list' %}true{% else %}false{% endif %},
+                        openAccessories: {% if current_url == 'accessory_unsold_list' or current_url == 'accessory_sold_list' or current_url == 'admin_accessory_category_list' %}true{% else %}false{% endif %},
+                        openFinance: {% if current_url == 'debt_list' or current_url == 'debt_payment_list' or current_url == 'expense_list' or current_url == 'salary_list' or current_url == 'extra_profit_list' %}true{% else %}false{% endif %},
+                        openKapital: {% if current_url == 'phone_capital_list' or current_url == 'accessory_capital_list' %}true{% else %}false{% endif %}
+                    }"
+                    class="space-y-1"
+                >
+                    <a href="{% url 'owner-branches' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'owner-branches' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                        <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                        <span class="text-sm font-medium">{% trans "Boshqaruv paneli" %}</span>
+                    </a>
+                    <a href="{% url 'journal_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'journal_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                        <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                        <span class="text-sm font-medium">{% trans "Jurnal" %}</span>
+                    </a>
+
+                    <div class="space-y-1">
+                        <button type="button" @click="openPhones = !openPhones" class="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'phone_unsold_list' or current_url == 'phone_sold_list' or current_url == 'admin_phone_category_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                            <span class="flex items-center gap-3">
+                                <span class="text-gray-400">{% include "widgets/icons/phone.svg" %}</span>
+                                <span class="text-sm font-medium">{% trans "Telefonlar" %}</span>
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openPhones ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul x-show="openPhones" x-cloak class="pl-9 space-y-1">
+                            <li>
+                                <a href="{% url 'phone_unsold_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'phone_unsold_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Sotilmagan telefonlar" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'phone_sold_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'phone_sold_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Sotilgan telefonlar" %}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-1">
+                        <button type="button" @click="openAccessories = !openAccessories" class="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'accessory_unsold_list' or current_url == 'accessory_sold_list' or current_url == 'admin_accessory_category_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                            <span class="flex items-center gap-3">
+                                <span class="text-gray-400">{% include "widgets/icons/accessory.svg" %}</span>
+                                <span class="text-sm font-medium">{% trans "Aksessuarlar" %}</span>
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openAccessories ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul x-show="openAccessories" x-cloak class="pl-9 space-y-1">
+                            <li>
+                                <a href="{% url 'accessory_unsold_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'accessory_unsold_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Sotilmagan aksessuarlar" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'accessory_sold_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'accessory_sold_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Sotilgan aksessuarlar" %}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-1">
+                        <button type="button" @click="openFinance = !openFinance" class="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'debt_list' or current_url == 'debt_payment_list' or current_url == 'expense_list' or current_url == 'salary_list' or current_url == 'extra_profit_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                            <span class="flex items-center gap-3">
+                                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                                <span class="text-sm font-medium">{% trans "Moliya" %}</span>
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openFinance ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul x-show="openFinance" x-cloak class="pl-9 space-y-1">
+                            <li>
+                                <a href="{% url 'debt_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'debt_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Qarzlar" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'debt_payment_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'debt_payment_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Qarz to‘lovlari" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'expense_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'expense_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Xarajatlar" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'salary_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'salary_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Oyliklar" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'extra_profit_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'extra_profit_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Qo‘shimcha foyda" %}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-1">
+                        <button type="button" @click="openKapital = !openKapital" class="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg min-h-[44px] {% if current_url == 'phone_capital_list' or current_url == 'accessory_capital_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-200{% endif %}">
+                            <span class="flex items-center gap-3">
+                                <span class="text-gray-400">{% include "widgets/icons/phone.svg" %}</span>
+                                <span class="text-sm font-medium">{% trans "Kapital" %}</span>
+                            </span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openKapital ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul x-show="openKapital" x-cloak class="pl-9 space-y-1">
+                            <li>
+                                <a href="{% url 'phone_capital_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'phone_capital_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Telefon kapitali" %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'accessory_capital_list' %}" class="flex items-center px-3 py-2 rounded-lg min-h-[40px] {% if current_url == 'accessory_capital_list' %}bg-gray-800 text-white{% else %}hover:bg-gray-800 text-gray-300{% endif %}">
+                                    <span class="text-sm">{% trans "Aksessuar kapitali" %}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endwith %}
+        {% elif is_phone_seller %}
+            <a href="{% url 'seller-dashboard' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Boshqaruv paneli" %}</span>
+            </a>
+            <a href="{% url 'phone_unsold_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/phone.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Telefonlar" %}</span>
+            </a>
+            <a href="{% url 'phone_sold_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/phone.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Sotilgan telefonlar" %}</span>
+            </a>
+            <a href="{% url 'debt_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/debt.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Qarz" %}</span>
+            </a>
+            <a href="{% url 'debt_payment_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Qarz to‘lovlari" %}</span>
+            </a>
+            <a href="{% url 'expense_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/expense.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Xarajat" %}</span>
+            </a>
+            <a href="{% url 'extra_profit_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/profit.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Qo‘shimcha foyda" %}</span>
+            </a>
+            <a href="{% url 'my_salary_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/salary.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Mening oyligim" %}</span>
+            </a>
+            <a href="{% url 'journal_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Jurnal" %}</span>
+            </a>
+        {% elif is_accessory_seller %}
+            <a href="{% url 'accessory-seller-dashboard' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Boshqaruv paneli" %}</span>
+            </a>
+            <a href="{% url 'accessory_unsold_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/accessory.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Sotilmagan aksessuarlar" %}</span>
+            </a>
+            <a href="{% url 'accessory_sold_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/accessory.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Sotilgan aksessuarlar" %}</span>
+            </a>
+            <a href="{% url 'debt_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/debt.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Qarz" %}</span>
+            </a>
+            <a href="{% url 'debt_payment_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Qarz to‘lovlari" %}</span>
+            </a>
+            <a href="{% url 'expense_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/expense.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Xarajat" %}</span>
+            </a>
+            <a href="{% url 'my_salary_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/salary.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Mening oyligim" %}</span>
+            </a>
+            <a href="{% url 'journal_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Jurnal" %}</span>
+            </a>
+        {% elif request.user.is_cashier %}
+            <a href="{% url 'cashier_dashboard' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/dashboard.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Boshqaruv paneli" %}</span>
+            </a>
+            <a href="{% url 'cashier_payment_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "To‘lovlar" %}</span>
+            </a>
+            <a href="{% url 'cashier_transaction_list' %}" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800 min-h-[44px]">
+                <span class="text-gray-400">{% include "widgets/icons/payment.svg" %}</span>
+                <span class="text-sm font-medium">{% trans "Tranzaksiyalar" %}</span>
+            </a>
+        {% endif %}
+    </nav>
+</div>

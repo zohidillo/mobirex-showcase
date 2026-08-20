@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sotilgan aksessuarlar" %}{% endblock %}
+{% block page_title %}{% trans "Sotilgan aksessuarlar" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% now "Y-m" as current_period %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Sotilgan aksessuarlar" %}</h1>
+        <a href="{% url 'accessory_unsold_list' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg min-h-[44px]">{% trans "Sotilmagan aksessuarlar" %}</a>
+    </div>
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <form method="get" class="filter-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Nomi bo‘yicha qidirish" %}</label>
+                <input name="q" value="{{ q }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" placeholder="{% trans 'Aksessuar nomi' %}" />
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Kategoriya" %}</label>
+                <select name="category" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barcha kategoriyalar" %}</option>
+                    {% for sale in object_list %}
+                        {% if sale.accessory.category %}
+                            <option value="{{ sale.accessory.category.id }}" {% if category == sale.accessory.category.id|stringformat:"s" %}selected{% endif %}>{{ sale.accessory.category.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Yil" %}</label>
+                <select name="year" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for year_option in year_options %}
+                        <option value="{{ year_option }}" {% if year == year_option|stringformat:"s" %}selected{% endif %}>{{ year_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Oy" %}</label>
+                <select name="month" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for month_value, month_label in month_choices %}
+                        <option value="{{ month_value }}" {% if month == month_value|stringformat:"s" %}selected{% endif %}>{{ month_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if is_owner %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Filial" %}</label>
+                    <select name="branch" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                        <option value="">{% trans "Barcha filiallar" %}</option>
+                        {% for b in owner_branches %}
+                            <option value="{{ b.id }}" {% if branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+            <div class="col-span-full flex gap-2 items-end">
+                <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+                <a href="{{ request.path }}" class="btn btn-secondary">{% trans "Tozalash" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for sale in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="text-lg font-bold text-gray-100">{{ sale.accessory.name }}</div>
+                <div class="text-gray-400 text-sm">{% trans "Soni" %}: {{ sale.quantity }}</div>
+                <div class="text-sm text-gray-300">{% trans "Jami" %}: {{ sale.total_price }}</div>
+                <div class="text-sm {% if sale.profit >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">{% trans "Foyda" %}: {{ sale.profit }}</div>
+                {% if is_owner %}
+                    <div class="text-sm text-gray-300">{% trans "Filial" %}: {{ sale.branch.name }}</div>
+                {% endif %}
+                <div class="text-sm text-gray-300">{% trans "Sotgan" %}: {{ sale.sold_by.username }}</div>
+                <div class="text-xs text-gray-400">{% trans "Sotilgan" %}: {{ sale.sold_at|date:"DATETIME_FORMAT" }}</div>
+                {% if sale.sold_at|date:"Y-m" == current_period %}
+                    <div class="mt-3">
+                        <a href="{% url 'accessory_return' sale.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg">{% trans "Qaytarish" %}</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Aksessuarlar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "Aksessuar" %}</th>
+                    <th class="py-2 text-left">{% trans "Soni" %}</th>
+                    <th class="py-2 text-left">{% trans "Jami narx" %}</th>
+                    <th class="py-2 text-left">{% trans "Foyda" %}</th>
+                    {% if is_owner %}
+                        <th class="py-2 text-left">{% trans "Filial" %}</th>
+                    {% endif %}
+                    <th class="py-2 text-left">{% trans "Sotgan" %}</th>
+                    <th class="py-2 text-left">{% trans "Sotilgan vaqt" %}</th>
+                    <th class="py-2 text-left">{% trans "Amallar" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for sale in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">{{ sale.accessory.name }}</td>
+                        <td class="py-3">{{ sale.quantity }}</td>
+                        <td class="py-3">{{ sale.total_price }}</td>
+                        <td class="py-3 {% if sale.profit >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">{{ sale.profit }}</td>
+                        {% if is_owner %}
+                            <td class="py-3">{{ sale.branch.name }}</td>
+                        {% endif %}
+                        <td class="py-3">{{ sale.sold_by.username }}</td>
+                        <td class="py-3">{{ sale.sold_at|date:"DATETIME_FORMAT" }}</td>
+                        <td class="py-3">
+                            {% if sale.sold_at|date:"Y-m" == current_period %}
+                                <a href="{% url 'accessory_return' sale.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg">{% trans "Qaytarish" %}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if is_owner %}8{% else %}7{% endif %}" class="py-6 text-center text-gray-400">{% trans "Aksessuarlar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "widgets/pagination.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

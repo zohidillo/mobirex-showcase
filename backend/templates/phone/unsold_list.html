@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sotilmagan telefonlar" %}{% endblock %}
+{% block page_title %}{% trans "Sotilmagan telefonlar" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Sotilmagan telefonlar" %}</h1>
+        {% if is_owner or is_phone_seller %}
+            <a href="{% url 'phone_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg min-h-[44px]">+ {% trans "Qo‘shish" %}</a>
+        {% endif %}
+    </div>
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <form method="get" class="filter-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Nomi bo‘yicha qidirish" %}</label>
+                <input name="name" value="{{ name }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" placeholder="{% trans "Telefon nomi" %}" />
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "IMEI bo‘yicha qidirish" %}</label>
+                <input name="imei" value="{{ imei }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" placeholder="{% trans "IMEI" %}" />
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Kategoriya" %}</label>
+                <select name="category" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barcha kategoriyalar" %}</option>
+                    {% for phone in object_list %}
+                        {% if phone.category %}
+                            <option value="{{ phone.category.id }}" {% if category == phone.category.id|stringformat:"s" %}selected{% endif %}>{{ phone.category.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Xotira" %}</label>
+                <select name="storage" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barcha xotira" %}</option>
+                    <option value="16" {% if storage == "16" %}selected{% endif %}>16 GB</option>
+                    <option value="32" {% if storage == "32" %}selected{% endif %}>32 GB</option>
+                    <option value="64" {% if storage == "64" %}selected{% endif %}>64 GB</option>
+                    <option value="128" {% if storage == "128" %}selected{% endif %}>128 GB</option>
+                    <option value="256" {% if storage == "256" %}selected{% endif %}>256 GB</option>
+                    <option value="512" {% if storage == "512" %}selected{% endif %}>512 GB</option>
+                    <option value="1024" {% if storage == "1024" %}selected{% endif %}>1 TB</option>
+                    <option value="2048" {% if storage == "2048" %}selected{% endif %}>2 TB</option>
+                </select>
+            </div>
+            {% if is_owner %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Filial" %}</label>
+                    <select name="branch" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                        <option value="">{% trans "Barcha filiallar" %}</option>
+                        {% for b in owner_branches %}
+                            <option value="{{ b.id }}" {% if branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+            <div class="col-span-full flex gap-2 items-end">
+                <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+                <a href="{{ request.path }}" class="btn btn-secondary">{% trans "Tozalash" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for phone in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-lg font-bold">{{ phone.name }}</div>
+                        <div class="text-gray-400 text-sm">{% trans "IMEI" %}: {{ phone.imei }}</div>
+                        <div class="text-gray-300 text-sm">{% trans "Kategoriya" %}: {{ phone.category.name }}</div>
+                    </div>
+                    <div class="text-gray-300 text-sm">{{ phone.storage }} GB</div>
+                </div>
+                <div class="mt-2 text-sm text-gray-300">{% trans "Rang" %}: {{ phone.color|default:"—" }}</div>
+                <div class="text-sm text-gray-300">{% trans "Kimdan olingan" %}: {{ phone.from_by|default:"—" }}</div>
+                <div class="text-sm text-gray-300">{% trans "Tannarx" %}: {{ phone.cost_price }}</div>
+                {% if is_owner %}
+                    <div class="text-sm text-gray-300">{% trans "Filial" %}: {{ phone.branch.name }}</div>
+                {% endif %}
+                <div class="text-sm text-gray-300">{% trans "Qo‘shgan" %}: {{ phone.created_by.username }}</div>
+                <div class="text-sm text-gray-300">{% trans "Qo‘shilgan" %}: {{ phone.added_at|date:"DATETIME_FORMAT" }}</div>
+                <div class="mt-3 grid grid-cols-1 gap-2">
+                    <a href="{% url 'phone_sell' phone.pk %}" class="bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center">{% trans "Sotish" %}</a>
+                    <a href="{% url 'phone_delete' phone.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center">{% trans "O‘chirish" %}</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Telefonlar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "Nomi" %}</th>
+                    <th class="py-2 text-left">{% trans "IMEI" %}</th>
+                    <th class="py-2 text-left">{% trans "Kategoriya" %}</th>
+                    <th class="py-2 text-left">{% trans "Xotira" %}</th>
+                    <th class="py-2 text-left">{% trans "Rang" %}</th>
+                    <th class="py-2 text-left">{% trans "Kimdan olingan" %}</th>
+                    {% if is_owner %}
+                        <th class="py-2 text-left">{% trans "Filial" %}</th>
+                    {% endif %}
+                    <th class="py-2 text-left">{% trans "Tannarx" %}</th>
+                    <th class="py-2 text-left">{% trans "Qo‘shgan" %}</th>
+                    <th class="py-2 text-left">{% trans "Qo‘shilgan vaqt" %}</th>
+                    <th class="py-2 text-left">{% trans "Amallar" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for phone in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">{{ phone.name }}</td>
+                        <td class="py-3">{{ phone.imei }}</td>
+                        <td class="py-3">{{ phone.category.name }}</td>
+                        <td class="py-3">{{ phone.storage }} GB</td>
+                        <td class="py-3">{{ phone.color|default:"—" }}</td>
+                        <td class="py-3">{{ phone.from_by|default:"—" }}</td>
+                        {% if is_owner %}
+                            <td class="py-3">{{ phone.branch.name }}</td>
+                        {% endif %}
+                        <td class="py-3">{{ phone.cost_price }}</td>
+                        <td class="py-3">{{ phone.created_by.username }}</td>
+                        <td class="py-3">{{ phone.added_at|date:"DATETIME_FORMAT" }}</td>
+                        <td class="py-3">
+                            <div class="flex gap-2">
+                                <a href="{% url 'phone_sell' phone.pk %}" class="bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]">{% trans "Sotish" %}</a>
+                                <a href="{% url 'phone_delete' phone.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]">{% trans "O‘chirish" %}</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if is_owner %}13{% else %}12{% endif %}" class="py-6 text-center text-gray-400">{% trans "Telefonlar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "widgets/pagination.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

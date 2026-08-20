@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Murojaatlar" %}{% endblock %}
+{% block page_title %}{% trans "Murojaatlar" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Murojaatlar" %}</h1>
+    </div>
+
+    <form method="get" class="bg-gray-900 rounded-xl border border-gray-800 p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">{% trans "Manba" %}</label>
+            <select name="source" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100">
+                <option value="">{% trans "Barchasi" %}</option>
+                {% for value, label in source_choices %}
+                    <option value="{{ value }}" {% if filter_source == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">{% trans "Tur" %}</label>
+            <select name="request_type" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100">
+                <option value="">{% trans "Barchasi" %}</option>
+                {% for value, label in request_type_choices %}
+                    <option value="{{ value }}" {% if filter_request_type == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">{% trans "Holat" %}</label>
+            <select name="status" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100">
+                <option value="">{% trans "Barchasi" %}</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="md:col-span-2">
+            <label class="block text-xs text-gray-400 mb-1">{% trans "Qidirish" %}</label>
+            <input type="text" name="q" value="{{ filter_q }}" placeholder="{% trans 'Ism, telefon, username...' %}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100">
+        </div>
+        <div class="md:col-span-5 flex gap-2 justify-end">
+            <a href="{% url 'admin_support_list' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg min-h-[40px]">{% trans "Tozalash" %}</a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg min-h-[40px]">{% trans "Filtrlash" %}</button>
+        </div>
+    </form>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for item in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-lg font-bold text-gray-100">#{{ item.id }} — {{ item.get_request_type_display }}</div>
+                        <div class="text-sm text-gray-300">
+                            {% if item.user %}{{ item.user.username }}{% elif item.full_name %}{{ item.full_name }}{% else %}—{% endif %}
+                        </div>
+                        {% if item.phone %}<div class="text-sm text-gray-400">{{ item.phone }}</div>{% endif %}
+                    </div>
+                    {% if item.unread_for_admin %}
+                        <span class="bg-red-600 text-white text-xs rounded-full px-2 py-1">{% trans "Yangi" %}</span>
+                    {% endif %}
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    <span class="text-xs px-2 py-1 rounded-lg
+                        {% if item.source == 'MOBILE_APP' %}bg-sky-900 text-sky-200
+                        {% elif item.source == 'LANDING_SITE' %}bg-purple-900 text-purple-200
+                        {% elif item.source == 'TELEGRAM_BOT' %}bg-orange-900 text-orange-200
+                        {% elif item.source == 'PUBLIC_APP' %}bg-emerald-900 text-emerald-200
+                        {% else %}bg-gray-800 text-gray-200{% endif %}">
+                        {{ item.get_source_display }}
+                    </span>
+                    <span class="text-xs px-2 py-1 rounded-lg
+                        {% if item.status == 'NEW' %}bg-red-900 text-red-200
+                        {% elif item.status == 'IN_PROGRESS' %}bg-amber-900 text-amber-200
+                        {% elif item.status == 'RESOLVED' %}bg-green-900 text-green-200
+                        {% else %}bg-gray-800 text-gray-300{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+                <div class="text-xs text-gray-500 mt-2">{{ item.added_at|date:"Y-m-d H:i" }}</div>
+                <div class="mt-3">
+                    <a href="{% url 'admin_support_detail' item.pk %}" class="block text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Ko‘rish" %}</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Yozuvlar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "ID" %}</th>
+                    <th class="py-2 text-left">{% trans "Tur" %}</th>
+                    <th class="py-2 text-left">{% trans "Manba" %}</th>
+                    <th class="py-2 text-left">{% trans "Foydalanuvchi" %}</th>
+                    <th class="py-2 text-left">{% trans "Telefon" %}</th>
+                    <th class="py-2 text-left">{% trans "Holat" %}</th>
+                    <th class="py-2 text-left">{% trans "Yaratilgan" %}</th>
+                    <th class="py-2 text-left">{% trans "Amallar" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for item in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">
+                            #{{ item.id }}
+                            {% if item.unread_for_admin %}<span class="ml-1 inline-block w-2 h-2 bg-red-500 rounded-full" title="{% trans 'Yangi xabar' %}"></span>{% endif %}
+                        </td>
+                        <td class="py-3">{{ item.get_request_type_display }}</td>
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-lg
+                                {% if item.source == 'MOBILE_APP' %}bg-sky-900 text-sky-200
+                                {% elif item.source == 'LANDING_SITE' %}bg-purple-900 text-purple-200
+                                {% elif item.source == 'TELEGRAM_BOT' %}bg-orange-900 text-orange-200
+                                {% elif item.source == 'PUBLIC_APP' %}bg-emerald-900 text-emerald-200
+                                {% else %}bg-gray-800 text-gray-200{% endif %}">
+                                {{ item.get_source_display }}
+                            </span>
+                        </td>
+                        <td class="py-3">
+                            {% if item.user %}{{ item.user.username }}{% elif item.full_name %}{{ item.full_name }}{% else %}—{% endif %}
+                        </td>
+                        <td class="py-3">{{ item.phone|default:"—" }}</td>
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-lg
+                                {% if item.status == 'NEW' %}bg-red-900 text-red-200
+                                {% elif item.status == 'IN_PROGRESS' %}bg-amber-900 text-amber-200
+                                {% elif item.status == 'RESOLVED' %}bg-green-900 text-green-200
+                                {% else %}bg-gray-800 text-gray-300{% endif %}">
+                                {{ item.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-3 text-gray-400">{{ item.added_at|date:"Y-m-d H:i" }}</td>
+                        <td class="py-3">
+                            <a href="{% url 'admin_support_detail' item.pk %}" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-3 py-2 min-h-[36px] inline-block">{% trans "Ko‘rish" %}</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="py-6 text-center text-gray-400">{% trans "Yozuvlar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "widgets/pagination.html" %}
+</div>
+{% endblock %}

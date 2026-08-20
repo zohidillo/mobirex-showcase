@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "To‘lov qo‘shish" %}{% endblock %}
+{% block page_title %}{% trans "To‘lov qo‘shish" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-4">{% trans "To‘lov qo‘shish" %}</h2>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3" data-debt-options-url="{% url 'debt_payment_debt_options' %}">
+            {% csrf_token %}
+            {% if is_owner and form.branch %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Filial" %}</label>
+                    <select
+                        id="id_branch"
+                        name="branch"
+                        class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100"
+                    >
+                        <option value="">{% trans "Filialni tanlang" %}</option>
+                        {% for branch_item in form.branch.field.queryset %}
+                            <option value="{{ branch_item.id }}" {% if form.branch.value == branch_item.id|stringformat:"s" %}selected{% endif %}>{{ branch_item.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.branch.errors %}<div class="text-red-400 text-sm">{{ form.branch.errors|striptags }}</div>{% endif %}
+                </div>
+            {% endif %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Qarz" %}</label>
+                <select
+                    id="id_debt"
+                    name="debt"
+                    class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100"
+                    data-placeholder="{% trans 'Qarzni tanlang' %}"
+                >
+                    <option value="">{% trans "Qarzni tanlang" %}</option>
+                    {% for d in form.debt.field.queryset %}
+                        <option value="{{ d.id }}" {% if form.debt.value == d.id|stringformat:"s" %}selected{% endif %}>
+                            {% if d.f_name %}
+                                {{ d.f_name }} — {{ d.remaining_amount }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %} — {{ d.remaining_amount }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form.debt.errors %}<div class="text-red-400 text-sm">{{ form.debt.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Summa" %}</label>
+                <input name="amount" value="{{ form.amount.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.amount.errors %}<div class="text-red-400 text-sm">{{ form.amount.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Izoh" %}</label>
+                <textarea name="note" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100" rows="3">{{ form.note.value|default_if_none:'' }}</textarea>
+                {% if form.note.errors %}<div class="text-red-400 text-sm">{{ form.note.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "To‘lov yaratish" %}</button>
+                <a href="{% url 'debt_payment_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        const tomSelectOptions = { create: false, sortField: { field: 'text', direction: 'asc' } };
+
+        document.querySelectorAll('.tom-select').forEach(function(el) {
+            if (window.TomSelect) {
+                new TomSelect(el, tomSelectOptions);
+            }
+        });
+
+        const form = document.querySelector('form[data-debt-options-url]');
+        const branchSelect = document.getElementById('id_branch');
+        const debtSelect = document.getElementById('id_debt');
+
+        if (!form || !branchSelect || !debtSelect) {
+            return;
+        }
+
+        const debtTomSelect = debtSelect.tomselect || null;
+        const placeholder = debtSelect.dataset.placeholder || '';
+
+        function setDebtDisabled(disabled) {
+            if (debtTomSelect) {
+                if (disabled) {
+                    debtTomSelect.disable();
+                } else {
+                    debtTomSelect.enable();
+                }
+                return;
+            }
+            debtSelect.disabled = disabled;
+        }
+
+        function renderDebtOptions(debts) {
+            if (debtTomSelect) {
+                debtTomSelect.clear(true);
+                debtTomSelect.clearOptions();
+                debtTomSelect.addOption({ value: '', text: placeholder });
+                debts.forEach(function(debt) {
+                    debtTomSelect.addOption({ value: String(debt.id), text: debt.label });
+                });
+                debtTomSelect.setValue('');
+                debtTomSelect.refreshOptions(false);
+                return;
+            }
+
+            debtSelect.innerHTML = '';
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = placeholder;
+            debtSelect.appendChild(placeholderOption);
+
+            debts.forEach(function(debt) {
+                const option = document.createElement('option');
+                option.value = debt.id;
+                option.textContent = debt.label;
+                debtSelect.appendChild(option);
+            });
+
+            debtSelect.value = '';
+        }
+
+        branchSelect.addEventListener('change', async function() {
+            const branchId = branchSelect.value;
+            renderDebtOptions([]);
+
+            if (!branchId) {
+                return;
+            }
+
+            setDebtDisabled(true);
+
+            try {
+                const url = new URL(form.dataset.debtOptionsUrl, window.location.origin);
+                url.searchParams.set('branch', branchId);
+
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Qarzlarni yuklab bo‘lmadi');
+                }
+
+                const data = await response.json();
+                renderDebtOptions(data.debts || []);
+            } catch (error) {
+                console.error(error);
+                renderDebtOptions([]);
+            } finally {
+                setDebtDisabled(false);
+            }
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Telefon sotish" %}{% endblock %}
+{% block page_title %}{% trans "Telefon sotish" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-2">{% trans "Telefon sotish" %}</h2>
+        <div class="bg-gray-800 rounded-lg p-3 mb-4">
+            <div class="text-gray-100 font-semibold">{{ phone.name }}</div>
+            <div class="text-gray-400 text-sm">{% trans "IMEI" %}: {{ phone.imei }}</div>
+            <div class="text-gray-300 text-sm">{% trans "Tannarx" %}: {{ phone.cost_price }}</div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Sotuv narxi" %}</label>
+                <input name="sell_price" value="{{ form.sell_price.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.sell_price.errors %}<div class="text-red-400 text-sm">{{ form.sell_price.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "Sotishni tasdiqlash" %}</button>
+                <a href="{% url 'phone_unsold_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

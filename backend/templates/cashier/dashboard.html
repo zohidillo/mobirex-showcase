@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Kassir paneli" %}{% endblock %}
+{% block page_title %}{% trans "Kassir paneli" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Jami foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-xl font-bold">{{ data.total_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Faol foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-xl font-bold">{{ data.active_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Bloklangan foydalanuvchilar" %}</div>
+            <div class="text-gray-100 text-xl font-bold">{{ data.blocked_users|default:"0" }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Bu oygi to‘lovlar" %}</div>
+            <div class="text-gray-100 text-xl font-bold">{{ data.payments_this_month|default:"0" }}</div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 mt-4">
+        <div class="text-gray-300 text-sm mb-3">{% trans "So‘nggi to‘lovlar" %}</div>
+        <div class="mt-2 space-y-3 md:hidden">
+            {% if data.last_payments %}
+                {% for payment in data.last_payments %}
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                        <div class="text-gray-100 font-semibold">{{ payment.user__username|default:payment.user_id }}</div>
+                        <div class="text-green-400 font-bold">{{ payment.amount }}</div>
+                        <div class="text-sm text-gray-300">
+                            {% trans "To‘lov turi" %}:
+                            {% if payment.payment_type == "cash" %}
+                                {% trans "Naqd" %}
+                            {% elif payment.payment_type == "click" %}
+                                Click
+                            {% elif payment.payment_type == "payme" %}
+                                Payme
+                            {% elif payment.payment_type == "paynet" %}
+                                Paynet
+                            {% else %}
+                                {{ payment.payment_type }}
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-400">{{ payment.added_at|date:"DATETIME_FORMAT" }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-gray-400 py-6">{% trans "To‘lovlar topilmadi" %}</div>
+            {% endif %}
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-800">
+                <thead>
+                    <tr class="text-gray-400 uppercase text-xs">
+                        <th class="py-2 text-left">{% trans "Foydalanuvchi" %}</th>
+                        <th class="py-2 text-left">{% trans "Summa" %}</th>
+                        <th class="py-2 text-left">{% trans "To‘lov turi" %}</th>
+                        <th class="py-2 text-left">{% trans "Sana" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                    {% for payment in data.last_payments %}
+                        <tr class="hover:bg-gray-800 transition">
+                            <td class="py-3">{{ payment.user__username|default:payment.user_id }}</td>
+                            <td class="py-3 text-green-400 font-bold">{{ payment.amount }}</td>
+                            <td class="py-3">
+                                <span class="bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-lg">
+                                    {% if payment.payment_type == "cash" %}
+                                        {% trans "Naqd" %}
+                                    {% elif payment.payment_type == "click" %}
+                                        Click
+                                    {% elif payment.payment_type == "payme" %}
+                                        Payme
+                                    {% elif payment.payment_type == "paynet" %}
+                                        Paynet
+                                    {% else %}
+                                        {{ payment.payment_type }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="py-3">{{ payment.added_at|date:"DATETIME_FORMAT" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-400">{% trans "To‘lovlar topilmadi" %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

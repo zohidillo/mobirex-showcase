@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Qarz to‘lovlari" %}{% endblock %}
+{% block page_title %}{% trans "Qarz to‘lovlari" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-100">{% trans "Qarz to‘lovlari" %}</h1>
+        {% if not is_read_only_month %}
+            {% if is_owner or is_phone_seller or is_accessory_seller %}
+                <a href="{% url 'debt_payment_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg min-h-[44px]">+ {% trans "Qo‘shish" %}</a>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if is_read_only_month %}
+        <div class="mb-4 rounded-lg border border-amber-700 bg-amber-950/40 px-4 py-3 text-sm text-amber-200">
+            {% trans "Tanlangan oy uchun to‘lovlar faqat ko‘rish uchun." %}
+        </div>
+    {% endif %}
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <form method="get" class="filter-form grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Qarz" %}</label>
+                <select name="debt" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barcha qarzlar" %}</option>
+                    {% for debt_item in debts %}
+                        <option value="{{ debt_item.id }}" {% if request.GET.debt == debt_item.id|stringformat:"s" %}selected{% endif %}>
+                            {% if debt_item.f_name %}
+                                {{ debt_item.f_name }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %}
+                            {% endif %} - {{ debt_item.remaining_amount }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if is_owner %}
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1">{% trans "Filial" %}</label>
+                    <select name="branch" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                        <option value="">{% trans "Barcha filiallar" %}</option>
+                        {% for b in owner_branches %}
+                            <option value="{{ b.id }}" {% if branch == b.id|stringformat:"s" %}selected{% endif %}>
+                                {{ b.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Yil" %}</label>
+                <select name="year" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for year_option in year_options %}
+                        <option value="{{ year_option }}" {% if year == year_option|stringformat:"s" %}selected{% endif %}>{{ year_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Oy" %}</label>
+                <select name="month" class="form-select tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for month_value, month_label in month_choices %}
+                        <option value="{{ month_value }}" {% if month == month_value|stringformat:"s" %}selected{% endif %}>{{ month_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-span-full flex gap-2 items-end">
+                <button type="submit" class="btn btn-primary">{% trans "Filtrlash" %}</button>
+                <a href="{{ request.path }}" class="btn btn-secondary">{% trans "Tozalash" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for payment in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="text-lg font-bold text-gray-100">
+                    {% if payment.debt.f_name %}
+                        {{ payment.debt.f_name }}
+                    {% else %}
+                        {% trans "Qo‘lda kiritilgan qarz" %}
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-300">{% trans "Summa" %}: {{ payment.amount }}</div>
+                <div class="text-sm text-gray-300">{% trans "Qoldiq" %}: {{ payment.remaining_balance }}</div>
+                {% if is_owner %}
+                    <div class="text-sm text-gray-300">{% trans "Filial" %}: {{ payment.debt.branch.name }}</div>
+                {% endif %}
+                <div class="text-sm text-gray-300">{% trans "Kim qo‘shgan" %}: {{ payment.paid_by }}</div>
+                <div class="text-xs text-gray-400">{% trans "To‘lov sanasi" %}: {{ payment.added_at|date:"DATETIME_FORMAT" }}</div>
+                {% if not is_read_only_month %}
+                    <div class="mt-3 grid grid-cols-1 gap-2">
+                        <a href="{% url 'debt_payment_delete' payment.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-4 py-2 min-h-[44px] text-center">{% trans "O‘chirish" %}</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "To‘lovlar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "Qarz" %}</th>
+                    {% if is_owner %}
+                        <th class="py-2 text-left">{% trans "Filial" %}</th>
+                    {% endif %}
+                    <th class="py-2 text-left">{% trans "Summa" %}</th>
+                    <th class="py-2 text-left">{% trans "Qoldiq" %}</th>
+                    <th class="py-2 text-left">{% trans "Kim qo‘shgan" %}</th>
+                    <th class="py-2 text-left">{% trans "To‘lov sanasi" %}</th>
+                    <th class="py-2 text-left">{% trans "Amallar" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for payment in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">
+                            {% if payment.debt.f_name %}
+                                {{ payment.debt.f_name }}
+                            {% else %}
+                                {% trans "Qo‘lda kiritilgan qarz" %}
+                            {% endif %}
+                        </td>
+                        {% if is_owner %}
+                            <td class="py-3">{{ payment.debt.branch.name }}</td>
+                        {% endif %}
+                        <td class="py-3">{{ payment.amount }}</td>
+                        <td class="py-3">{{ payment.remaining_balance }}</td>
+                        <td class="py-3">{{ payment.paid_by }}</td>
+                        <td class="py-3">{{ payment.added_at|date:"DATETIME_FORMAT" }}</td>
+                        <td class="py-3">
+                            {% if not is_read_only_month %}
+                                <div class="flex gap-2">
+                                    <a href="{% url 'debt_payment_delete' payment.pk %}" class="bg-rose-600 hover:bg-rose-700 transition text-white rounded-lg px-3 py-2 min-h-[44px]">{% trans "O‘chirish" %}</a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if is_owner %}7{% else %}6{% endif %}" class="py-6 text-center text-gray-400">{% trans "To‘lovlar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "widgets/pagination.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

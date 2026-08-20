@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Murojaat" %} #{{ object.id }}{% endblock %}
+{% block page_title %}{% trans "Murojaat" %} #{{ object.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="mb-4 flex items-center gap-3">
+        <a href="{% url 'admin_support_list' %}" class="text-gray-400 hover:text-gray-200">&larr; {% trans "Ro‘yxatga qaytish" %}</a>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "ID" %}</div>
+                <div class="text-lg font-semibold">#{{ object.id }}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Tur" %}</div>
+                <div>{{ object.get_request_type_display }}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Manba" %}</div>
+                <div>
+                    <span class="text-xs px-2 py-1 rounded-lg
+                        {% if object.source == 'MOBILE_APP' %}bg-sky-900 text-sky-200
+                        {% elif object.source == 'LANDING_SITE' %}bg-purple-900 text-purple-200
+                        {% elif object.source == 'TELEGRAM_BOT' %}bg-orange-900 text-orange-200
+                        {% elif object.source == 'PUBLIC_APP' %}bg-emerald-900 text-emerald-200
+                        {% else %}bg-gray-800 text-gray-200{% endif %}">
+                        {{ object.get_source_display }}
+                    </span>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Holat" %}</div>
+                <div>
+                    <span class="text-xs px-2 py-1 rounded-lg
+                        {% if object.status == 'NEW' %}bg-red-900 text-red-200
+                        {% elif object.status == 'IN_PROGRESS' %}bg-amber-900 text-amber-200
+                        {% elif object.status == 'RESOLVED' %}bg-green-900 text-green-200
+                        {% else %}bg-gray-800 text-gray-300{% endif %}">
+                        {{ object.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Foydalanuvchi" %}</div>
+                <div>{% if object.user %}{{ object.user.username }}{% else %}—{% endif %}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "To‘liq ism" %}</div>
+                <div>{{ object.full_name|default:"—" }}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Telefon" %}</div>
+                <div>{{ object.phone|default:"—" }}</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 uppercase">{% trans "Yaratilgan" %}</div>
+                <div>{{ object.added_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="text-xs text-gray-400 uppercase mb-1">{% trans "Asosiy xabar" %}</div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg p-3 whitespace-pre-wrap text-sm">{{ object.message }}</div>
+        </div>
+    </div>
+
+    {% if is_closed %}
+        <div class="bg-gray-900 rounded-xl border border-green-800 p-4 md:p-6 mb-4">
+            <h2 class="text-lg font-semibold text-green-300 mb-3">{% trans "Yopilish ma'lumotlari" %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div>
+                    <div class="text-xs text-gray-400 uppercase">{% trans "Yopilgan vaqt" %}</div>
+                    <div>{{ object.closed_at|date:"Y-m-d H:i" }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 uppercase">{% trans "Yopgan admin" %}</div>
+                    <div>{% if object.closed_by %}{{ object.closed_by.username }}{% else %}—{% endif %}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 uppercase">{% trans "Sabab" %}</div>
+                    <div>{{ object.get_close_reason_display|default:"—" }}</div>
+                </div>
+                <div class="md:col-span-2">
+                    <div class="text-xs text-gray-400 uppercase">{% trans "Izoh" %}</div>
+                    <div class="whitespace-pre-wrap">{{ object.close_reason_note|default:"—" }}</div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6 mb-4">
+        <h2 class="text-lg font-semibold mb-3">{% trans "Xabarlar tarixi" %}</h2>
+        <div class="space-y-3">
+            {% for msg in messages_list %}
+                <div class="flex {% if msg.sender_type == 'ADMIN' %}justify-end{% elif msg.sender_type == 'SYSTEM' %}justify-center{% else %}justify-start{% endif %}">
+                    <div class="max-w-[80%] rounded-xl px-4 py-2
+                        {% if msg.sender_type == 'ADMIN' %}bg-blue-900 text-blue-50
+                        {% elif msg.sender_type == 'SYSTEM' %}bg-gray-800 text-gray-300 text-center text-xs italic
+                        {% else %}bg-gray-700 text-gray-100{% endif %}">
+                        <div class="text-xs opacity-70 mb-1">
+                            {{ msg.get_sender_type_display }}
+                            {% if msg.sender %}— {{ msg.sender.username }}{% endif %}
+                            · {{ msg.added_at|date:"Y-m-d H:i" }}
+                        </div>
+                        <div class="whitespace-pre-wrap text-sm">{{ msg.message }}</div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-400 py-6">{% trans "Xabarlar yo‘q" %}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if is_telegram and not is_closed %}
+        <div class="bg-orange-900/30 border border-orange-800 rounded-xl p-4 mb-4 text-orange-200 text-sm">
+            {% trans "Telegram murojaatlariga bu yerdan javob bering: TG guruh orqali" %}
+        </div>
+    {% endif %}
+
+    {% if can_reply %}
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6 mb-4">
+            <h2 class="text-lg font-semibold mb-3">{% trans "Javob yozish" %}</h2>
+            <form method="post" action="{% url 'admin_support_reply' object.pk %}">
+                {% csrf_token %}
+                <textarea name="message" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" placeholder="{% trans 'Javobingizni yozing...' %}" required></textarea>
+                <div class="mt-3 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg min-h-[44px]">{% trans "Yuborish" %}</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if can_close %}
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6">
+            <h2 class="text-lg font-semibold mb-3">{% trans "Murojaatni yopish" %}</h2>
+            <form method="post" action="{% url 'admin_support_close' object.pk %}" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">{% trans "Yangi holat" %}</label>
+                    <select name="new_status" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" required>
+                        <option value="RESOLVED">{% trans "Hal qilindi" %}</option>
+                        <option value="REJECTED">{% trans "Rad etildi" %}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">{% trans "Sabab" %}</label>
+                    <select name="close_reason" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" required>
+                        {% for value, label in close_form.fields.close_reason.choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs text-gray-400 mb-1">{% trans "Izoh (ixtiyoriy)" %}</label>
+                    <textarea name="close_reason_note" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100"></textarea>
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg min-h-[44px]" onclick="return confirm('{% trans "Yopishni tasdiqlaysizmi?" %}');">{% trans "Yopish" %}</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

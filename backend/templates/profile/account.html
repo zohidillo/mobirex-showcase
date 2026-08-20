@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Profil" %}{% endblock %}
+{% block page_title %}{% trans "Profil" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Balans" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ request.user.balance }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Hisob holati" %}</div>
+            <div class="mt-2">
+                <span class="text-xs px-2 py-1 rounded-lg {% if request.user.account_status == 'active' %}bg-green-900 text-green-300{% elif request.user.account_status == 'grace' %}bg-amber-900 text-amber-200{% elif request.user.account_status == 'vip' %}bg-sky-900 text-sky-300{% else %}bg-rose-900 text-rose-300{% endif %}">
+                    {{ request.user.get_account_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Kunlik to‘lov" %}</div>
+            <div class="text-gray-100 text-2xl font-bold">{{ request.user.daily_fee }}</div>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+            <div class="text-gray-400 text-sm">{% trans "Imtiyoz boshlanish sanasi" %}</div>
+            <div class="text-gray-100 text-lg font-semibold mt-2">{{ request.user.grace_start_date|default:"—" }}</div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 mt-4">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <div class="text-lg font-semibold text-gray-100">{% trans "Mening tranzaksiyalarim" %}</div>
+            <a href="{% url 'profile_change_password' %}" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg min-h-[44px]">{% trans "Parolni o'zgartirish" %}</a>
+        </div>
+
+        <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Turi" %}</label>
+                <select name="type" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Barcha turlar" %}</option>
+                    {% for value, label in transaction_types %}
+                        <option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Boshlanish sanasi" %}</label>
+                <input type="date" name="from_date" value="{{ filters.from_date }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Tugash sanasi" %}</label>
+                <input type="date" name="to_date" value="{{ filters.to_date }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+            </div>
+            <div class="md:col-span-3 flex gap-2">
+                <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+                <a href="{{ request.path }}" class="btn btn-secondary">{% trans "Tozalash" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for item in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="flex items-start justify-between gap-3">
+                    <span class="text-xs px-2 py-1 rounded-lg {% if item.type == 'daily_charge' %}bg-amber-900 text-amber-200{% elif item.type == 'payment' %}bg-green-900 text-green-300{% else %}bg-blue-900 text-blue-300{% endif %}">
+                        {{ item.get_type_display }}
+                    </span>
+                    <div class="text-xs text-gray-400">{{ item.charge_date|date:"DATETIME_FORMAT" }}</div>
+                </div>
+                <div class="mt-3 text-sm text-gray-300">{% trans "Summa" %}: {{ item.amount }}</div>
+                <div class="text-sm text-gray-300">{% trans "Oldingi balans" %}: {{ item.balance_before }}</div>
+                <div class="text-sm text-gray-300">{% trans "Keyingi balans" %}: {{ item.balance_after }}</div>
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Tranzaksiyalar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "Turi" %}</th>
+                    <th class="py-2 text-left">{% trans "Summa" %}</th>
+                    <th class="py-2 text-left">{% trans "Oldingi balans" %}</th>
+                    <th class="py-2 text-left">{% trans "Keyingi balans" %}</th>
+                    <th class="py-2 text-left">{% trans "Sana" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for item in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-lg {% if item.type == 'daily_charge' %}bg-amber-900 text-amber-200{% elif item.type == 'payment' %}bg-green-900 text-green-300{% else %}bg-blue-900 text-blue-300{% endif %}">
+                                {{ item.get_type_display }}
+                            </span>
+                        </td>
+                        <td class="py-3">{{ item.amount }}</td>
+                        <td class="py-3">{{ item.balance_before }}</td>
+                        <td class="py-3">{{ item.balance_after }}</td>
+                        <td class="py-3">{{ item.charge_date|date:"DATETIME_FORMAT" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-6 text-center text-gray-400">{% trans "Tranzaksiyalar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "widgets/pagination.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

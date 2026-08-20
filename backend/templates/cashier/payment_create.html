@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "To‘lov qo‘shish" %}{% endblock %}
+{% block page_title %}{% trans "To‘lov qo‘shish" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100 flex items-start justify-center">
+    <div class="w-full max-w-lg bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+        <h2 class="text-lg font-semibold mb-4">{% trans "To‘lov qo‘shish" %}</h2>
+
+        {% if form.non_field_errors %}
+            <div class="text-red-400 text-sm mb-3">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Foydalanuvchi" %}</label>
+                <select name="user" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    <option value="">{% trans "Foydalanuvchini tanlang" %}</option>
+                    {% for user in form.user.field.queryset %}
+                        <option value="{{ user.id }}" {% if form.user.value == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.user.errors %}<div class="text-red-400 text-sm">{{ form.user.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "Summa" %}</label>
+                <input type="number" step="0.01" min="0" name="amount" value="{{ form.amount.value|default_if_none:'' }}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100" />
+                {% if form.amount.errors %}<div class="text-red-400 text-sm">{{ form.amount.errors|striptags }}</div>{% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-400 text-xs mb-1">{% trans "To‘lov turi" %}</label>
+                <select name="payment_type" class="tom-select w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 min-h-[44px] text-gray-100">
+                    {% for value, label in form.payment_type.field.choices %}
+                        <option value="{{ value }}" {% if form.payment_type.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.payment_type.errors %}<div class="text-red-400 text-sm">{{ form.payment_type.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="rounded-xl border border-gray-800 bg-gray-950 px-4 py-3 text-sm text-gray-300">
+                {% trans "Qo‘shilgan summa avval qarzni yopadi, so‘ngra foydalanuvchi balansiga qo‘shiladi." %}
+            </div>
+            <div class="pt-2 space-y-2">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 transition text-white rounded-lg px-4 py-2 min-h-[44px]">{% trans "To‘lovni saqlash" %}</button>
+                <a href="{% url 'cashier_payment_list' %}" class="w-full block text-center bg-gray-800 hover:bg-gray-700 transition text-gray-100 rounded-lg px-4 py-2 min-h-[44px]">{% trans "Bekor qilish" %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tom-select').forEach(function(el) {
+        if (window.TomSelect) {
+            new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' } });
+        }
+    });
+</script>
+{% endblock %}

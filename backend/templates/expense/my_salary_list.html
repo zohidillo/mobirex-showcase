@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mening oyliklarim" %}{% endblock %}
+{% block page_title %}{% trans "Mening oyliklarim" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background-color: #030712; color: #f3f4f6; }
+    aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+    header { background-color: #111827 !important; border-color: #1f2937 !important; }
+    aside a:hover { background-color: #1f2937 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="-m-4 sm:-m-6 p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="mt-4 space-y-3 md:hidden">
+        {% for salary in object_list %}
+            <div class="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800">
+                <div class="text-lg font-bold text-gray-100">{{ salary.amount }}</div>
+                {% if salary.note %}<div class="text-sm text-gray-300">{{ salary.note }}</div>{% endif %}
+                <div class="text-xs text-gray-400">{% trans "Kiritilgan" %}: {{ salary.added_at|date:"DATETIME_FORMAT" }}</div>
+            </div>
+        {% empty %}
+            <div class="text-center text-gray-400 py-10">{% trans "Oyliklar topilmadi" %}</div>
+        {% endfor %}
+    </div>
+
+    <div class="hidden md:block mt-4 bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-800 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800">
+            <thead>
+                <tr class="text-gray-400 uppercase text-xs">
+                    <th class="py-2 text-left">{% trans "Summa" %}</th>
+                    <th class="py-2 text-left">{% trans "Izoh" %}</th>
+                    <th class="py-2 text-left">{% trans "Kiritilgan vaqt" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800 text-gray-200 text-sm">
+                {% for salary in object_list %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="py-3">{{ salary.amount }}</td>
+                        <td class="py-3">{{ salary.note }}</td>
+                        <td class="py-3">{{ salary.added_at|date:"DATETIME_FORMAT" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="py-6 text-center text-gray-400">{% trans "Oyliklar topilmadi" %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "widgets/pagination.html" %}
+</div>
+{% endblock %}

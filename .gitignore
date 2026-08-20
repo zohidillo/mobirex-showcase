@@ -1,43 +1,47 @@
-# --- Secrets: nothing below may ever be committed ---
+# Environment
 .env
 .env.*
 !.env.example
-!**/.env.example
+
+# Secrets
 *.jks
 *.keystore
 key.properties
-*.pem
+*.p8
 *.p12
-*.key
-secrets.json
-service-account*.json
+*.mobileprovision
+*.cer
+google-services.json
+GoogleService-Info.plist
 
-# --- Data ---
+# Data
 *.sql
-*.sqlite3
-*.db
 *.dump
+*.sqlite3
 
-# --- Python ---
+# Python
 __pycache__/
-*.py[cod]
-.venv/
+*.pyc
 venv/
+.venv/
 .pytest_cache/
-.coverage
-htmlcov/
+staticfiles/
+media/
 
-# --- Flutter / Dart ---
-.dart_tool/
+# Flutter
 build/
+.dart_tool/
 .flutter-plugins*
 *.iml
 
-# --- Logs ---
-*.log
+# Node
+node_modules/
 
-# --- Editors / OS ---
+# Logs
+*.log
+logs/
+
+# OS / IDE
+.DS_Store
 .idea/
 .vscode/
-.DS_Store
-Thumbs.db

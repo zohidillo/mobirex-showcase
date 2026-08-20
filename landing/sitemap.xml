@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://mobirex.uz/</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/" />
+  </url>
+
+  <url>
+    <loc>https://mobirex.uz/contact.html</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/contact.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/contact.html?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/contact.html?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/contact.html" />
+  </url>
+
+  <url>
+    <loc>https://mobirex.uz/support.html</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/support.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/support.html?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/support.html?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/support.html" />
+  </url>
+
+  <url>
+    <loc>https://mobirex.uz/privacy.html</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/privacy.html?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/privacy.html?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/privacy.html" />
+  </url>
+
+  <url>
+    <loc>https://mobirex.uz/terms.html</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/terms.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/terms.html?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/terms.html?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/terms.html" />
+  </url>
+
+  <url>
+    <loc>https://mobirex.uz/account-deletion.html</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://mobirex.uz/account-deletion.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mobirex.uz/account-deletion.html?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mobirex.uz/account-deletion.html?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mobirex.uz/account-deletion.html" />
+  </url>
+
+</urlset>

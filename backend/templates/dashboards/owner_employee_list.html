@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Xodimlar" %}{% endblock %}
+{% block page_title %}{{ branch.name }}{% endblock %}
+
+{% block content %}
+<div class="p-3 md:p-6 bg-gray-950 min-h-screen text-gray-100">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-100">{{ branch.name }}</div>
+        <div class="text-sm text-gray-400">{% trans "Xodimlar" %}</div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for employee in employees %}
+        {% if employee.role != "OWNER" %}
+            <a href="{% url 'owner-employee-dashboard' branch.id employee.id %}" class="block min-h-[80px]">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg hover:bg-gray-800 transition duration-200 h-full">
+                    <div class="text-lg font-bold text-gray-100">
+                        {{ employee.username }}
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">{% trans "Foydalanuvchi nomi" %}: {{ employee.username }}</div>
+                    <div class="mt-3">
+                        {% if employee.role == "PHONE_SELLER" %}
+                            <span class="inline-block rounded-full px-3 py-1 text-xs bg-blue-900 text-blue-300">{% trans "Telefon sotuvchisi" %}</span>
+                        {% elif employee.role == "ACCESSORY_SELLER" %}
+                            <span class="inline-block rounded-full px-3 py-1 text-xs bg-purple-900 text-purple-300">{% trans "Aksessuar sotuvchisi" %}</span>
+                        {% else %}
+                            <span class="inline-block rounded-full px-3 py-1 text-xs bg-gray-800 text-gray-300">{{ employee.role }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        {% endif %}
+        {% empty %}
+            <div class="col-span-full text-center text-gray-400 py-10">{% trans "Xodim topilmadi" %}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
